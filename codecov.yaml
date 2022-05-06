@@ -1,0 +1,11 @@
+coverage:
+  status:
+    project:
+      default:
+        threshold: 0.1%
+    patch:
+      default:
+        target: 70%
+ignore:
+  - "**/zz_generated.deepcopy.go"
+  - "cmd/apiserver/*"

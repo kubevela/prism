@@ -1,0 +1,72 @@
+name: UnitTest
+
+on:
+  push:
+    branches:
+      - master
+      - release-*
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - master
+      - release-*
+
+env:
+  GO_VERSION: '1.18'
+
+jobs:
+
+  detect-noop:
+    runs-on: ubuntu-20.04
+    outputs:
+      noop: ${{ steps.noop.outputs.should_skip }}
+    steps:
+      - name: Detect No-op Changes
+        id: noop
+        uses: fkirc/skip-duplicate-actions@v3.3.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          paths_ignore: '["**.md", "**.mdx", "**.png", "**.jpg"]'
+          do_not_skip: '["workflow_dispatch", "schedule", "push"]'
+          concurrent_skipping: false
+
+  unit-test:
+    runs-on: ubuntu-20.04
+    needs: detect-noop
+    if: needs.detect-noop.outputs.noop != 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go Dependencies
+        uses: actions/cache@v2
+        with:
+          path: .work/pkg
+          key: ${{ runner.os }}-pkg-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-pkg-
+
+      - name: install Kubebuilder
+        uses: RyanSiu1995/kubebuilder-action@v1.2
+        with:
+          version: 3.1.0
+          kubebuilderOnly: false
+          kubernetesVersion: v1.22.0
+
+      - name: Run unit-test
+        run: make unit-test
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: /tmp/vela-prism-coverage.txt
+          flags: unit-test
+          name: codecov-umbrella
