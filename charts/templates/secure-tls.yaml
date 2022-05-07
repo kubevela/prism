@@ -1,0 +1,173 @@
+{{ if .Values.secureTLS.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-certgen
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-certgen
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get"]
+  - apiGroups: ["apiregistration.k8s.io"]
+    resources: ["apiservices"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-certgen
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-certgen
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-certgen
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-certgen
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      name: {{ .Release.Name }}-certgen
+      labels:
+        {{- include "vela-prism.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: create
+          image: {{ .Values.imageRegistry }}{{ .Values.secureTLS.certGen.image.repository }}:{{ .Values.secureTLS.certGen.image.tag }}
+          imagePullPolicy: {{ .Values.secureTLS.certGen.image.pullPolicy }}
+          args:
+            - create
+            - --host={{ .Release.Name }},{{ .Release.Name }}.{{ .Release.Namespace }}.svc
+            - --namespace={{ .Release.Namespace }}
+            - --secret-name={{ .Release.Name }}
+            - --key-name=apiserver.key
+            - --cert-name=apiserver.crt
+      restartPolicy: OnFailure
+      serviceAccountName: {{ .Release.Name }}-certgen
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-certpatch
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-certpatch
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get"]
+  - apiGroups: ["apiregistration.k8s.io"]
+    resources: ["apiservices"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-certpatch
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-certpatch
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-certpatch
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-certpatch
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      name: {{ .Release.Name }}-certpatch
+      labels:
+        {{- include "vela-prism.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: patch
+          image: {{ .Values.imageRegistry }}{{ .Values.secureTLS.certPatch.image.repository }}:{{ .Values.secureTLS.certPatch.image.tag }}
+          imagePullPolicy: {{ .Values.secureTLS.certPatch.image.pullPolicy }}
+          command:
+            - /patch
+          args:
+            - --secret-namespace={{ .Release.Namespace }}
+            - --secret-name={{ .Release.Name }}
+            - --target-APIService=v1alpha1.apiextensions.core.oam.dev
+      restartPolicy: OnFailure
+      serviceAccountName: {{ .Release.Name }}-certpatch
+      securityContext:
+        runAsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+{{ end }}

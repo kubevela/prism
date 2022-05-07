@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "vela-prism.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "vela-prism.labels" . | nindent 6 }}
+      {{- include "vela-prism.selector-labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "vela-prism.labels" . | nindent 8 }}
+        {{- include "vela-prism.selector-labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+        - name: {{ .Release.Name }}
+          args:
+            - "vela-prism"
+            - "--secure-port={{ .Values.port }}"
+            - "--feature-gates=APIPriorityAndFairness=false"
+            - "--cert-dir={{ .Values.secureTLS.certPath }}"
+          image: {{ .Values.imageRegistry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+            - containerPort: {{ .Values.port }}
+          {{ if .Values.secureTLS.enabled }}
+          volumeMounts:
+            - mountPath: {{ .Values.secureTLS.certPath }}
+              name: tls-cert-vol
+              readOnly: true
+          {{- end }}
+      {{ if .Values.secureTLS.enabled }}
+      volumes:
+        - name: tls-cert-vol
+          secret:
+            defaultMode: 420
+            secretName: {{ .Release.Name }}
+      {{ end }}

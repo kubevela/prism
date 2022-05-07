@@ -1,0 +1,44 @@
+# Default values for prism.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+## @param replicaCount apiserver replica count
+replicaCount: 1
+
+## @param port apiserver port
+port: 9443
+
+## @param imageRegistry Image registry
+imageRegistry: ""
+
+## @param image.repository APIExtensionServer image repository
+## @param image.tag APIExtensionServer image tag
+## @param image.pullPolicy APIExtensionServer image pull policy
+image:
+  repository: oamdev/vela-prism
+  tag: latest
+  pullPolicy: IfNotPresent
+
+## @param resources.limits.cpu APIExtensionServer cpu limit
+## @param resources.limits.memory APIExtensionServer memory limit
+resources:
+  limits:
+    cpu: 100m
+    memory: 200Mi
+
+## @param secureTLS.enabled Whether to enable secure TLS
+## @param secureTLS.certPath Path to the certificate file
+secureTLS:
+  enabled: true
+  certPath: /etc/k8s-apiserver-certs
+  certGen:
+    image:
+      repository: oamdev/kube-webhook-certgen
+      tag: v2.3
+      pullPolicy: IfNotPresent
+  certPatch:
+    image:
+      repository: oamdev/cluster-gateway
+      tag: v1.3.2
+      pullPolicy: IfNotPresent

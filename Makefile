@@ -17,7 +17,10 @@ tidy:
 unit-test:
 	go test -v -coverpkg=./... -coverprofile=/tmp/vela-prism-coverage.txt ./...
 
-reviewable: generate fmt vet
+charts:
+	cp README.md ./charts/
+
+reviewable: generate fmt vet charts
 
 image-apiserver:
 	docker build -t oamdev/vela-prism:${IMG_TAG} \
