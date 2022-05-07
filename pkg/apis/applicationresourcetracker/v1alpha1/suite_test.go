@@ -23,16 +23,15 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
-var cfg *rest.Config
-var k8sClient client.Client
 var testEnv *envtest.Environment
 
 func TestApplicationResourceTracker(t *testing.T) {
@@ -51,11 +50,12 @@ var _ = BeforeSuite(func() {
 		UseExistingCluster:       pointer.Bool(false),
 	}
 
-	var err error
-	cfg, err = testEnv.Start()
+	cfg, err := testEnv.Start()
 	Ω(err).To(Succeed())
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	singleton.SetKubeConfig(cfg)
+	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Ω(err).To(Succeed())
+	singleton.SetKubeClient(k8sClient)
 })
 
 var _ = AfterSuite(func() {

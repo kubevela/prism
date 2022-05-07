@@ -17,22 +17,80 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"testing"
+	"context"
 
-	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apiserver/pkg/endpoints/request"
+
+	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
-func TestApplicationResourceTrackerTypes(t *testing.T) {
-	r := require.New(t)
-	appRt := &ApplicationResourceTracker{
-		ObjectMeta: metav1.ObjectMeta{Name: "appRt"},
-	}
-	r.Equal("appRt", appRt.GetObjectMeta().Name)
-	r.True(appRt.NamespaceScoped())
-	r.IsType(appRt.New(), &ApplicationResourceTracker{})
-	r.IsType(appRt.NewList(), &ApplicationResourceTrackerList{})
-	r.Equal(ApplicationResourceTrackerResource, appRt.GetGroupVersionResource().Resource)
-	r.Equal(GroupVersion, appRt.GetGroupVersionResource().GroupVersion())
-	r.True(appRt.IsStorageVersion())
-}
+var _ = Describe("Test ApplicationResourceTracker API", func() {
+
+	It("Test ApplicationResourceTracker API", func() {
+		s := &ApplicationResourceTracker{}
+
+		By("Test meta info")
+		Ω(s.New()).To(Equal(&ApplicationResourceTracker{}))
+		Ω(s.NamespaceScoped()).To(BeTrue())
+		Ω(s.ShortNames()).To(ContainElement("apprt"))
+		Ω(s.GetGroupVersionResource().GroupVersion()).To(Equal(GroupVersion))
+		Ω(s.GetGroupVersionResource().Resource).To(Equal(ApplicationResourceTrackerResource))
+		Ω(s.IsStorageVersion()).To(BeTrue())
+		Ω(s.NewList()).To(Equal(&ApplicationResourceTrackerList{}))
+
+		ctx := context.Background()
+
+		By("Create RT")
+		createRt := func(name, ns, val string) *unstructured.Unstructured {
+			rt := &unstructured.Unstructured{}
+			rt.SetGroupVersionKind(ResourceTrackerGroupVersionKind)
+			rt.SetName(name + "-" + ns)
+			rt.SetLabels(map[string]string{
+				labelAppNamespace: ns,
+				"key":             val,
+			})
+			Ω(singleton.GetKubeClient().Create(ctx, rt)).To(Succeed())
+			return rt
+		}
+		createRt("app-1", "example", "x")
+		createRt("app-2", "example", "y")
+		createRt("app-1", "default", "x")
+		createRt("app-2", "default", "x")
+		createRt("app-3", "default", "x")
+
+		By("Test Get")
+		_appRt1, err := s.Get(request.WithNamespace(ctx, "default"), "app-1", nil)
+		Ω(err).To(Succeed())
+		appRt1, ok := _appRt1.(*ApplicationResourceTracker)
+		Ω(ok).To(BeTrue())
+		Ω(appRt1.GetLabels()["key"]).To(Equal("x"))
+		_, err = s.Get(request.WithNamespace(ctx, "no"), "app-1", nil)
+		Ω(errors.IsNotFound(err)).To(BeTrue())
+
+		By("Test List")
+		_appRts1, err := s.List(request.WithNamespace(ctx, "example"), nil)
+		Ω(err).To(Succeed())
+		appRts1, ok := _appRts1.(*ApplicationResourceTrackerList)
+		Ω(ok).To(BeTrue())
+		Ω(len(appRts1.Items)).To(Equal(2))
+
+		_appRts2, err := s.List(ctx, &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromValidatedSet(map[string]string{"key": "x"})})
+		Ω(err).To(Succeed())
+		appRts2, ok := _appRts2.(*ApplicationResourceTrackerList)
+		Ω(ok).To(BeTrue())
+		Ω(len(appRts2.Items)).To(Equal(4))
+
+		_appRts3, err := s.List(request.WithNamespace(ctx, "default"), &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromValidatedSet(map[string]string{"key": "x"})})
+		Ω(err).To(Succeed())
+		appRts3, ok := _appRts3.(*ApplicationResourceTrackerList)
+		Ω(ok).To(BeTrue())
+		Ω(len(appRts3.Items)).To(Equal(3))
+	})
+
+})

@@ -26,7 +26,7 @@ import (
 
 const (
 	// Group the group for the apiextensions
-	Group = "apiextensions.core.oam.dev"
+	Group = "prism.oam.dev"
 	// Version the version for the v1alpha1 apiextensions
 	Version = "v1alpha1"
 )

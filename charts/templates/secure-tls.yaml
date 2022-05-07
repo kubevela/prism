@@ -163,7 +163,7 @@ spec:
           args:
             - --secret-namespace={{ .Release.Namespace }}
             - --secret-name={{ .Release.Name }}
-            - --target-APIService=v1alpha1.apiextensions.core.oam.dev
+            - --target-APIService=v1alpha1.prism.oam.dev
       restartPolicy: OnFailure
       serviceAccountName: {{ .Release.Name }}-certpatch
       securityContext:

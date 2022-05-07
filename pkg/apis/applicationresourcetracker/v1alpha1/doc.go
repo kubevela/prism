@@ -21,7 +21,6 @@ limitations under the License.
 // Package v1alpha1 contains types required for v1alpha1
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/oam-dev/kubevela/apis/apiextensions.core.oam.dev
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=apiextensions.core.oam.dev
-package v1alpha1 // import "github.com/kubevela/prism/apis/apiextensions.core.oam.dev/v1alpha1"
+// +groupName=prism.oam.dev
+package v1alpha1

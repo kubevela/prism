@@ -19,22 +19,20 @@ package main
 import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	apprtv1alpha1 "github.com/kubevela/prism/pkg/apis/applicationresourcetracker/v1alpha1"
+	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
 func main() {
-	cfg := config.GetConfigOrDie()
 	cmd, err := builder.APIServer.
 		WithLocalDebugExtension().
 		ExposeLoopbackMasterClientConfig().
 		ExposeLoopbackAuthorizer().
 		WithoutEtcd().
-		WithResourceAndHandler(
-			&apprtv1alpha1.ApplicationResourceTracker{},
-			apprtv1alpha1.NewResourceHandlerProvider(cfg),
-		).Build()
+		WithResource(&apprtv1alpha1.ApplicationResourceTracker{}).
+		WithPostStartHook("init-master-loopback-client", singleton.InitLoopbackClient).
+		Build()
 	if err != nil {
 		klog.Fatal(err)
 	}
