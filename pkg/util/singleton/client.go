@@ -17,15 +17,18 @@ limitations under the License.
 package singleton
 
 import (
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 var kubeConfig *rest.Config
 var kubeClient client.Client
+var restMapper meta.RESTMapper
 
 // GetKubeConfig get kubernetes config
 func GetKubeConfig() *rest.Config {
@@ -52,7 +55,13 @@ func InitLoopbackClient(ctx server.PostStartHookContext) (err error) {
 	if kubeConfig, err = config.GetConfig(); err != nil {
 		return err
 	}
-	if kubeClient, err = client.New(kubeConfig, client.Options{Scheme: scheme.Scheme}); err != nil {
+	if restMapper, err = apiutil.NewDiscoveryRESTMapper(kubeConfig); err != nil {
+		return err
+	}
+	if kubeClient, err = client.New(kubeConfig, client.Options{
+		Scheme: scheme.Scheme,
+		Mapper: restMapper,
+	}); err != nil {
 		return err
 	}
 	return nil

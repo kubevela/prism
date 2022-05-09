@@ -21,6 +21,8 @@ import (
 	"sigs.k8s.io/apiserver-runtime/pkg/builder"
 
 	apprtv1alpha1 "github.com/kubevela/prism/pkg/apis/applicationresourcetracker/v1alpha1"
+	clusterv1alpha1 "github.com/kubevela/prism/pkg/apis/cluster/v1alpha1"
+	"github.com/kubevela/prism/pkg/util/log"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
@@ -31,11 +33,14 @@ func main() {
 		ExposeLoopbackAuthorizer().
 		WithoutEtcd().
 		WithResource(&apprtv1alpha1.ApplicationResourceTracker{}).
+		WithResource(&clusterv1alpha1.Cluster{}).
 		WithPostStartHook("init-master-loopback-client", singleton.InitLoopbackClient).
 		Build()
 	if err != nil {
 		klog.Fatal(err)
 	}
+	log.AddLogFlags(cmd)
+	clusterv1alpha1.AddClusterFlags(cmd.Flags())
 	if err = cmd.Execute(); err != nil {
 		klog.Fatal(err)
 	}
