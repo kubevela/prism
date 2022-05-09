@@ -1,7 +1,8 @@
 # Prism
-[![Go Report Card](https://goreportcard.com/badge/github.com/kubevela/kubevela)](https://goreportcard.com/report/github.com/kubevela/kubevela)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubevela/prism)](https://goreportcard.com/report/github.com/kubevela/prism)
 [![codecov](https://codecov.io/gh/kubevela/prism/branch/master/graph/badge.svg)](https://codecov.io/gh/kubevela/vela-prism)
 [![LICENSE](https://img.shields.io/github/license/kubevela/prism.svg?style=flat-square)](/LICENSE)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/kubevela/prism.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/kubevela/prism/alerts/)
 
 ## Introduction
 
