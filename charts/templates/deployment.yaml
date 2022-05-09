@@ -25,6 +25,7 @@ spec:
             - "--secure-port={{ .Values.port }}"
             - "--feature-gates=APIPriorityAndFairness=false"
             - "--cert-dir={{ .Values.secureTLS.certPath }}"
+            - "--storage-namespace={{ .Release.Namespace }}"
           image: {{ .Values.imageRegistry }}{{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:

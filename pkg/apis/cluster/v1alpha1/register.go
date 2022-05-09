@@ -22,6 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
+	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 )
 
 const (
@@ -37,13 +38,18 @@ func init() {
 	}
 }
 
-// AddToScheme add ApplicationResourceTracker scheme
+// AddToScheme add virtual cluster scheme
 var AddToScheme = func(scheme *runtime.Scheme) error {
 	metav1.AddToGroupVersion(scheme, GroupVersion)
+	metav1.AddToGroupVersion(scheme, ocmclusterv1.GroupVersion)
 	// +kubebuilder:scaffold:install
 	scheme.AddKnownTypes(GroupVersion,
-		&ApplicationResourceTracker{},
-		&ApplicationResourceTrackerList{},
+		&Cluster{},
+		&ClusterList{},
+	)
+	scheme.AddKnownTypes(ocmclusterv1.GroupVersion,
+		&ocmclusterv1.ManagedCluster{},
+		&ocmclusterv1.ManagedClusterList{},
 	)
 	return nil
 }
@@ -52,12 +58,12 @@ var AddToScheme = func(scheme *runtime.Scheme) error {
 var GroupVersion = schema.GroupVersion{Group: Group, Version: Version}
 
 var (
-	// ApplicationResourceTrackerResource resource name for ApplicationResourceTracker
-	ApplicationResourceTrackerResource = "applicationresourcetrackers"
-	// ApplicationResourceTrackerKind kind name for ApplicationResourceTracker
-	ApplicationResourceTrackerKind = "ApplicationResourceTracker"
-	// ApplicationResourceTrackerGroupResource GroupResource for ApplicationResourceTracker
-	ApplicationResourceTrackerGroupResource = schema.GroupResource{Group: Group, Resource: ApplicationResourceTrackerResource}
-	// ApplicationResourceTrackerGroupVersionKind GroupVersionKind for ApplicationResourceTracker
-	ApplicationResourceTrackerGroupVersionKind = GroupVersion.WithKind(ApplicationResourceTrackerKind)
+	// ClusterResource resource name for Cluster
+	ClusterResource = "clusters"
+	// ClusterKind kind name for Cluster
+	ClusterKind = "Cluster"
+	// ClusterGroupResource GroupResource for Cluster
+	ClusterGroupResource = schema.GroupResource{Group: Group, Resource: ClusterResource}
+	// ClusterGroupVersionKind GroupVersionKind for Cluster
+	ClusterGroupVersionKind = GroupVersion.WithKind(ClusterKind)
 )

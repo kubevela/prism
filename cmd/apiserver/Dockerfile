@@ -34,6 +34,7 @@ RUN upx --best --lzma -o /workspace/vela-prism-${TARGETARCH}-upx /workspace/vela
 FROM ${BASE_IMAGE:-alpine:3.15}
 # This is required by daemon connnecting with cri
 RUN apk add --no-cache ca-certificates bash expat
+RUN apk add curl
 
 WORKDIR /
 
