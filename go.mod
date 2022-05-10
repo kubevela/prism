@@ -17,7 +17,7 @@ require (
 	open-cluster-management.io/api v0.7.0
 	sigs.k8s.io/apiserver-runtime v1.1.1
 	sigs.k8s.io/controller-runtime v0.11.2
-	sigs.k8s.io/controller-tools v0.8.0
+	sigs.k8s.io/controller-tools v0.6.2
 )
 
 require (
