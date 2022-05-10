@@ -67,7 +67,7 @@ func (in *Cluster) Get(ctx context.Context, name string, options *metav1.GetOpti
 		}
 	}
 
-	if err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
+	if err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) && !runtime.IsNotRegisteredError(err) {
 		managedClusterErr = err
 	}
 
