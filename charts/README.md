@@ -10,7 +10,7 @@
 **Prism** provides API Extensions to the core [KubeVela](https://github.com/kubevela/kubevela).
 It works as a Kubernetes [Aggregated API Server](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/apiserver-aggregation/).
 
-[PrismArch](https://github.com/kubevela/prism/blob/master/hack/prism-arch.jpg)
+![PrismArch](https://github.com/kubevela/prism/blob/master/hack/prism-arch.jpg)
 
 ## Installation
 
