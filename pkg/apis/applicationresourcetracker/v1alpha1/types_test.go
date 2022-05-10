@@ -91,6 +91,11 @@ var _ = Describe("Test ApplicationResourceTracker API", func() {
 		appRts3, ok := _appRts3.(*ApplicationResourceTrackerList)
 		Ω(ok).To(BeTrue())
 		Ω(len(appRts3.Items)).To(Equal(3))
+
+		_, err = s.ConvertToTable(ctx, appRt1, nil)
+		Ω(err).To(Succeed())
+		_, err = s.ConvertToTable(ctx, appRts3, nil)
+		Ω(err).To(Succeed())
 	})
 
 })
