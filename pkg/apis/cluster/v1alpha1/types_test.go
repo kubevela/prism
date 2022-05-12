@@ -146,12 +146,18 @@ var _ = Describe("Test Cluster API", func() {
 		clusters, ok := objs.(*ClusterList)
 		Ω(ok).To(BeTrue())
 		Expect(len(clusters.Items)).To(Equal(3))
+		Expect(clusters.Items[0].Name).To(Equal("local"))
+		Expect(clusters.Items[1].Name).To(Equal("ocm-cluster"))
+		Expect(clusters.Items[2].Name).To(Equal("test-cluster"))
 
+		By("Test list clusters with labels")
 		objs, err = c.List(ctx, &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromSet(map[string]string{"key": "value"})})
 		Ω(err).To(Succeed())
 		clusters, ok = objs.(*ClusterList)
 		Ω(ok).To(BeTrue())
 		Expect(len(clusters.Items)).To(Equal(2))
+		Expect(clusters.Items[0].Name).To(Equal("ocm-cluster"))
+		Expect(clusters.Items[1].Name).To(Equal("test-cluster"))
 
 		By("Test print table")
 		_, err = c.ConvertToTable(ctx, cluster, nil)
