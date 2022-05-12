@@ -96,6 +96,7 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 	}
 	clusters := &ClusterList{}
 	if opts.LabelSelector == nil || opts.LabelSelector.Empty() {
+		opts.LabelSelector = labels.NewSelector()
 		local := NewLocalCluster()
 		clusters.Items = []Cluster{*local}
 	}
