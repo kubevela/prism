@@ -58,7 +58,6 @@ var _ = Describe("Test Cluster API", func() {
 		ctx := context.Background()
 
 		By("Create storage namespace")
-		StorageNamespace = "vela-system"
 		Ω(singleton.GetKubeClient().Create(ctx, &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: StorageNamespace}})).To(Succeed())
 
 		By("Create cluster secret")
@@ -71,6 +70,7 @@ var _ = Describe("Test Cluster API", func() {
 					clustergatewaycommon.LabelKeyClusterEndpointType:   string(clustergatewayv1alpha1.ClusterEndpointTypeConst),
 					"key": "value",
 				},
+				Annotations: map[string]string{AnnotationClusterAlias: "test-cluster-alias"},
 			},
 		})).To(Succeed())
 		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
@@ -85,6 +85,7 @@ var _ = Describe("Test Cluster API", func() {
 		Ω(err).To(Succeed())
 		cluster, ok := obj.(*Cluster)
 		Ω(ok).To(BeTrue())
+		Ω(cluster.Spec.Alias).To(Equal("test-cluster-alias"))
 		Ω(cluster.Spec.CredentialType).To(Equal(clustergatewayv1alpha1.CredentialTypeX509Certificate))
 		Ω(cluster.GetLabels()["key"]).To(Equal("value"))
 
@@ -145,12 +146,18 @@ var _ = Describe("Test Cluster API", func() {
 		clusters, ok := objs.(*ClusterList)
 		Ω(ok).To(BeTrue())
 		Expect(len(clusters.Items)).To(Equal(3))
+		Expect(clusters.Items[0].Name).To(Equal("local"))
+		Expect(clusters.Items[1].Name).To(Equal("ocm-cluster"))
+		Expect(clusters.Items[2].Name).To(Equal("test-cluster"))
 
+		By("Test list clusters with labels")
 		objs, err = c.List(ctx, &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromSet(map[string]string{"key": "value"})})
 		Ω(err).To(Succeed())
 		clusters, ok = objs.(*ClusterList)
 		Ω(ok).To(BeTrue())
 		Expect(len(clusters.Items)).To(Equal(2))
+		Expect(clusters.Items[0].Name).To(Equal("ocm-cluster"))
+		Expect(clusters.Items[1].Name).To(Equal("test-cluster"))
 
 		By("Test print table")
 		_, err = c.ConvertToTable(ctx, cluster, nil)

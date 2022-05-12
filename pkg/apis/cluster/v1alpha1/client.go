@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"sort"
 
 	clustergatewaycommon "github.com/oam-dev/cluster-gateway/pkg/common"
 	corev1 "k8s.io/api/core/v1"
@@ -96,6 +97,7 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 	}
 	clusters := &ClusterList{}
 	if opts.LabelSelector == nil || opts.LabelSelector.Empty() {
+		opts.LabelSelector = labels.NewSelector()
 		local := NewLocalCluster()
 		clusters.Items = []Cluster{*local}
 	}
@@ -123,6 +125,15 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 			}
 		}
 	}
+	sort.Slice(clusters.Items, func(i, j int) bool {
+		if clusters.Items[i].Name == ClusterLocalName {
+			return true
+		} else if clusters.Items[j].Name == ClusterLocalName {
+			return false
+		} else {
+			return clusters.Items[i].CreationTimestamp.After(clusters.Items[j].CreationTimestamp.Time)
+		}
+	})
 	return clusters, nil
 }
 

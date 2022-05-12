@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"github.com/oam-dev/cluster-gateway/pkg/apis/cluster/v1alpha1"
+	"github.com/oam-dev/cluster-gateway/pkg/config"
 	"github.com/spf13/pflag"
 )
 
@@ -32,8 +33,13 @@ const (
 	ClusterBlankEndpoint = "-"
 )
 
+var (
+	// AnnotationClusterAlias the annotation key for cluster alias
+	AnnotationClusterAlias = config.MetaApiGroupName + "/cluster-alias"
+)
+
 // StorageNamespace refers to the namespace of cluster secret, usually same as the core kubevela system namespace
-var StorageNamespace string
+var StorageNamespace = "vela-system"
 
 // AddClusterFlags add flags for cluster api
 func AddClusterFlags(set *pflag.FlagSet) {
