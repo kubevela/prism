@@ -108,6 +108,16 @@ var _ = Describe("Test Cluster API", func() {
 				ManagedClusterClientConfigs: []ocmclusterv1.ClientConfig{{URL: "test-url"}},
 			},
 		})).To(Succeed())
+		Ω(singleton.GetKubeClient().Create(ctx, &ocmclusterv1.ManagedCluster{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-cluster",
+				Namespace: StorageNamespace,
+				Labels:    map[string]string{"key": "value-dup"},
+			},
+			Spec: ocmclusterv1.ManagedClusterSpec{
+				ManagedClusterClientConfigs: []ocmclusterv1.ClientConfig{{URL: "test-url-dup"}},
+			},
+		})).To(Succeed())
 
 		By("Test get cluster from OCM managed cluster")
 		_, err = c.Get(ctx, "ocm-bad-cluster", nil)
@@ -118,6 +128,13 @@ var _ = Describe("Test Cluster API", func() {
 		cluster, ok = obj.(*Cluster)
 		Ω(ok).To(BeTrue())
 		Expect(cluster.Spec.CredentialType).To(Equal(CredentialTypeOCMManagedCluster))
+
+		By("Test get local cluster")
+		obj, err = c.Get(ctx, "local", nil)
+		Ω(err).To(Succeed())
+		cluster, ok = obj.(*Cluster)
+		Ω(ok).To(BeTrue())
+		Expect(cluster.Spec.CredentialType).To(Equal(CredentialTypeInternal))
 
 		_, err = c.Get(ctx, "cluster-not-exist", nil)
 		Ω(err).To(Satisfy(apierrors.IsNotFound))
