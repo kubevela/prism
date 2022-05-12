@@ -96,3 +96,13 @@ func (in *Cluster) GetFullName() string {
 	}
 	return fmt.Sprintf("%s (%s)", in.GetName(), in.Spec.Alias)
 }
+
+// HasCluster return if the cluster list contains a cluster with the specified name
+func (in *ClusterList) HasCluster(name string) bool {
+	for _, cluster := range in.Items {
+		if cluster.Name == name {
+			return true
+		}
+	}
+	return false
+}

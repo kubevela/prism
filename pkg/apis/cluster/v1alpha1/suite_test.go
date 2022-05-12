@@ -34,7 +34,7 @@ import (
 
 var testEnv *envtest.Environment
 
-func TestApplicationResourceTracker(t *testing.T) {
+func TestCluster(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Cluster Extension API Test")
 }
