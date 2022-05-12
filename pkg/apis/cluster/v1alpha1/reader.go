@@ -65,6 +65,9 @@ func newCluster(obj client.Object) *Cluster {
 		cluster.SetName(obj.GetName())
 		cluster.SetCreationTimestamp(obj.GetCreationTimestamp())
 		cluster.SetLabels(extractLabels(obj.GetLabels()))
+		if annotations := obj.GetAnnotations(); annotations != nil {
+			cluster.Spec.Alias = annotations[AnnotationClusterAlias]
+		}
 	}
 	cluster.Spec.Accepted = true
 	cluster.Spec.Endpoint = ClusterBlankEndpoint

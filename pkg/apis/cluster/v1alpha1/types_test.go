@@ -58,7 +58,6 @@ var _ = Describe("Test Cluster API", func() {
 		ctx := context.Background()
 
 		By("Create storage namespace")
-		StorageNamespace = "vela-system"
 		Ω(singleton.GetKubeClient().Create(ctx, &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: StorageNamespace}})).To(Succeed())
 
 		By("Create cluster secret")
@@ -71,6 +70,7 @@ var _ = Describe("Test Cluster API", func() {
 					clustergatewaycommon.LabelKeyClusterEndpointType:   string(clustergatewayv1alpha1.ClusterEndpointTypeConst),
 					"key": "value",
 				},
+				Annotations: map[string]string{AnnotationClusterAlias: "test-cluster-alias"},
 			},
 		})).To(Succeed())
 		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
@@ -85,6 +85,7 @@ var _ = Describe("Test Cluster API", func() {
 		Ω(err).To(Succeed())
 		cluster, ok := obj.(*Cluster)
 		Ω(ok).To(BeTrue())
+		Ω(cluster.Spec.Alias).To(Equal("test-cluster-alias"))
 		Ω(cluster.Spec.CredentialType).To(Equal(clustergatewayv1alpha1.CredentialTypeX509Certificate))
 		Ω(cluster.GetLabels()["key"]).To(Equal("value"))
 
