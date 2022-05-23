@@ -25,6 +25,7 @@ RUN GO111MODULE=on CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
 # Before copying the Go binary directly to the final image,
 # add them to the intermdediate upx image
 FROM gruebel/upx:latest as upx
+ARG TARGETARCH
 COPY --from=builder /workspace/vela-prism-${TARGETARCH} /workspace/vela-prism-${TARGETARCH}
 # Compress the binary and copy it to final image
 RUN upx --best --lzma -o /workspace/vela-prism-${TARGETARCH}-upx /workspace/vela-prism-${TARGETARCH}
