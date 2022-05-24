@@ -14,6 +14,20 @@ It works as a Kubernetes [Aggregated API Server](https://kubernetes.io/docs/conc
 
 ## Installation
 
+### From chart repository
+
+Add the chart repository
+```shell
+helm repo add prism https://charts.kubevela.net/prism
+helm repo update
+```
+
+Install helm chart
+```shell
+helm install vela-prism prism/vela-prism -n vela-system
+```
+
+### From this repo
 Clone this repo and run `helm install vela-prism charts/ --namespace vela-system`.
 
 ## Modules
