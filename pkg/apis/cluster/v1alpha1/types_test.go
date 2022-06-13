@@ -78,6 +78,16 @@ var _ = Describe("Test Cluster API", func() {
 				Name:      "cluster-invalid",
 				Namespace: StorageNamespace,
 			},
+			Data: map[string][]byte{"endpoint": []byte("127.0.0.1:6443")},
+		})).To(Succeed())
+		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "ocm-cluster",
+				Namespace: StorageNamespace,
+				Labels: map[string]string{
+					clustergatewaycommon.LabelKeyClusterCredentialType: string(clustergatewayv1alpha1.CredentialTypeX509Certificate),
+				},
+			},
 		})).To(Succeed())
 
 		By("Test get cluster from cluster secret")

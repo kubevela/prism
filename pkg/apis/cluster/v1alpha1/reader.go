@@ -89,8 +89,11 @@ func NewClusterFromSecret(secret *corev1.Secret) (*Cluster, error) {
 	if metav1.HasLabel(secret.ObjectMeta, clustergatewaycommon.LabelKeyClusterEndpointType) {
 		cluster.Spec.Endpoint = secret.GetLabels()[clustergatewaycommon.LabelKeyClusterEndpointType]
 	}
+	if cluster.Spec.Endpoint == "" {
+		return nil, NewEmptyEndpointClusterSecretError()
+	}
 	if !metav1.HasLabel(secret.ObjectMeta, clustergatewaycommon.LabelKeyClusterCredentialType) {
-		return nil, NewInvalidClusterSecretError()
+		return nil, NewEmptyCredentialTypeClusterSecretError()
 	}
 	cluster.Spec.CredentialType = clustergatewayv1alpha1.CredentialType(
 		secret.GetLabels()[clustergatewaycommon.LabelKeyClusterCredentialType])

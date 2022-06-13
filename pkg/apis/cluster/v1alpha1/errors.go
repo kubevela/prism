@@ -18,20 +18,31 @@ package v1alpha1
 
 import "errors"
 
-type invalidClusterSecretError struct{}
+type emptyCredentialTypeClusterSecretError struct{}
 
-func (e invalidClusterSecretError) Error() string {
+func (e emptyCredentialTypeClusterSecretError) Error() string {
 	return "secret is not a valid cluster secret, no credential type found"
 }
 
-// NewInvalidClusterSecretError create an invalid cluster secret error
-func NewInvalidClusterSecretError() error {
-	return invalidClusterSecretError{}
+// NewEmptyCredentialTypeClusterSecretError create an invalid cluster secret error due to empty credential type
+func NewEmptyCredentialTypeClusterSecretError() error {
+	return emptyCredentialTypeClusterSecretError{}
+}
+
+type emptyEndpointClusterSecretError struct{}
+
+func (e emptyEndpointClusterSecretError) Error() string {
+	return "secret is not a valid cluster secret, no credential type found"
+}
+
+// NewEmptyEndpointClusterSecretError create an invalid cluster secret error due to empty endpoint
+func NewEmptyEndpointClusterSecretError() error {
+	return emptyEndpointClusterSecretError{}
 }
 
 // IsInvalidClusterSecretError check if an error is an invalid cluster secret error
 func IsInvalidClusterSecretError(err error) bool {
-	return errors.As(err, &invalidClusterSecretError{})
+	return errors.As(err, &emptyCredentialTypeClusterSecretError{}) || errors.As(err, &emptyEndpointClusterSecretError{})
 }
 
 type invalidManagedClusterError struct{}
