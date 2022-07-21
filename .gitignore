@@ -30,3 +30,5 @@ default.etcd/**
 *.tgz
 index.yaml
 *.test
+
+hack/debug

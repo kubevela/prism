@@ -18,47 +18,14 @@ package v1alpha1
 
 import (
 	"testing"
-	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/utils/pointer"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	_ "github.com/kubevela/prism/test/bootstrap"
 )
-
-var testEnv *envtest.Environment
 
 func TestCluster(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Cluster Extension API Test")
 }
-
-var _ = BeforeSuite(func() {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
-	By("Bootstrapping Test Environment")
-	testEnv = &envtest.Environment{
-		ControlPlaneStartTimeout: time.Minute,
-		ControlPlaneStopTimeout:  time.Minute,
-		Scheme:                   scheme.Scheme,
-		CRDDirectoryPaths:        []string{"../../../../test/testdata/crds"},
-		UseExistingCluster:       pointer.Bool(false),
-	}
-
-	cfg, err := testEnv.Start()
-	Ω(err).To(Succeed())
-	singleton.SetKubeConfig(cfg)
-	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	Ω(err).To(Succeed())
-	singleton.SetKubeClient(k8sClient)
-})
-
-var _ = AfterSuite(func() {
-	By("Tearing Down the Test Environment")
-	Ω(testEnv.Stop()).To(Succeed())
-})

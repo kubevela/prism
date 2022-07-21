@@ -14,18 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package config
 
-import (
-	"testing"
+import "github.com/spf13/pflag"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+// ObservabilityNamespace refers to the namespace for storing secrets and configs
+var ObservabilityNamespace = "o11y-system"
 
-	_ "github.com/kubevela/prism/test/bootstrap"
-)
-
-func TestApplicationResourceTracker(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "ApplicationResourceTracker Extension API Test")
+// AddObservabilityFlags add flags for observability api
+func AddObservabilityFlags(set *pflag.FlagSet) {
+	set.StringVarP(&ObservabilityNamespace, "observability-namespace", "", "o11y-system",
+		"The namespace for storing observability secrets and configs.")
 }

@@ -14,18 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Api versions allow the api contract for a resource to be changed while keeping
+// backward compatibility by support multiple concurrent versions
+// of the same resource
+
+// Package v1alpha1 contains types required for v1alpha1
+// +k8s:openapi-gen=true
+// +k8s:deepcopy-gen=package,register
+// +k8s:defaulter-gen=TypeMeta
+// +groupName=o11y.prism.oam.dev
 package v1alpha1
-
-import (
-	"testing"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
-	_ "github.com/kubevela/prism/test/bootstrap"
-)
-
-func TestApplicationResourceTracker(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "ApplicationResourceTracker Extension API Test")
-}

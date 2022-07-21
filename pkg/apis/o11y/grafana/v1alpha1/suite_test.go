@@ -25,7 +25,7 @@ import (
 	_ "github.com/kubevela/prism/test/bootstrap"
 )
 
-func TestApplicationResourceTracker(t *testing.T) {
+func TestGrafana(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "ApplicationResourceTracker Extension API Test")
+	RunSpecs(t, "Grafana Extension API Test")
 }
