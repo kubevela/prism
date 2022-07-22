@@ -87,7 +87,7 @@ func (in *GrafanaDashboard) IsStorageVersion() bool {
 
 // ShortNames delivers a list of short names for a resource.
 func (in *GrafanaDashboard) ShortNames() []string {
-	return []string{"gdb", "datasource", "grafana-datasource"}
+	return []string{"gdb", "datasource", "datasources", "grafana-datasource", "grafana-datasources"}
 }
 
 // Get finds a resource in the storage by name and returns it.
