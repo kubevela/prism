@@ -22,6 +22,10 @@ import (
 
 	apprtv1alpha1 "github.com/kubevela/prism/pkg/apis/applicationresourcetracker/v1alpha1"
 	clusterv1alpha1 "github.com/kubevela/prism/pkg/apis/cluster/v1alpha1"
+	o11yconfig "github.com/kubevela/prism/pkg/apis/o11y/config"
+	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
+	grafanadashboardv1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadashboard/v1alpha1"
+	grafanadatasourcev1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadatasource/v1alpha1"
 	"github.com/kubevela/prism/pkg/util/log"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
@@ -34,6 +38,9 @@ func main() {
 		WithoutEtcd().
 		WithResource(&apprtv1alpha1.ApplicationResourceTracker{}).
 		WithResource(&clusterv1alpha1.Cluster{}).
+		WithResource(&grafanav1alpha1.Grafana{}).
+		WithResource(&grafanadatasourcev1alpha1.GrafanaDatasource{}).
+		WithResource(&grafanadashboardv1alpha1.GrafanaDashboard{}).
 		WithPostStartHook("init-master-loopback-client", singleton.InitLoopbackClient).
 		Build()
 	if err != nil {
@@ -41,6 +48,7 @@ func main() {
 	}
 	log.AddLogFlags(cmd)
 	clusterv1alpha1.AddClusterFlags(cmd.Flags())
+	o11yconfig.AddObservabilityFlags(cmd.Flags())
 	if err = cmd.Execute(); err != nil {
 		klog.Fatal(err)
 	}

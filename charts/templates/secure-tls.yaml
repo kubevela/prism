@@ -164,6 +164,15 @@ spec:
             - --secret-namespace={{ .Release.Namespace }}
             - --secret-name={{ .Release.Name }}
             - --target-APIService=v1alpha1.prism.oam.dev
+        - name: patch-o11y
+          image: {{ .Values.imageRegistry }}{{ .Values.secureTLS.certPatch.image.repository }}:{{ .Values.secureTLS.certPatch.image.tag }}
+          imagePullPolicy: {{ .Values.secureTLS.certPatch.image.pullPolicy }}
+          command:
+            - /patch
+          args:
+            - --secret-namespace={{ .Release.Namespace }}
+            - --secret-name={{ .Release.Name }}
+            - --target-APIService=v1alpha1.o11y.prism.oam.dev
       restartPolicy: OnFailure
       serviceAccountName: {{ .Release.Name }}-certpatch
       securityContext:

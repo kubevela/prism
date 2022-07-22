@@ -29,9 +29,9 @@ import (
 func (in *Cluster) ConvertToTable(ctx context.Context, object runtime.Object, tableOptions runtime.Object) (*metav1.Table, error) {
 	switch obj := object.(type) {
 	case *Cluster:
-		return printClusterGateway(obj), nil
+		return printCluster(obj), nil
 	case *ClusterList:
-		return printClusterGatewayList(obj), nil
+		return printClusterList(obj), nil
 	default:
 		return nil, fmt.Errorf("unknown type %T", object)
 	}
@@ -49,14 +49,14 @@ var (
 	}
 )
 
-func printClusterGateway(in *Cluster) *metav1.Table {
+func printCluster(in *Cluster) *metav1.Table {
 	return &metav1.Table{
 		ColumnDefinitions: definitions,
 		Rows:              []metav1.TableRow{printClusterRow(in)},
 	}
 }
 
-func printClusterGatewayList(in *ClusterList) *metav1.Table {
+func printClusterList(in *ClusterList) *metav1.Table {
 	t := &metav1.Table{
 		ColumnDefinitions: definitions,
 	}
