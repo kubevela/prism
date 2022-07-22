@@ -31,6 +31,8 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/kubevela/prism/pkg/util/apiserver"
 )
 
 // ClusterClient client for reading cluster information
@@ -91,10 +93,7 @@ func (c *clusterClient) Get(ctx context.Context, name string) (*Cluster, error) 
 }
 
 func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) (*ClusterList, error) {
-	opts := &client.ListOptions{}
-	for _, opt := range options {
-		opt.ApplyToList(opts)
-	}
+	opts := apiserver.NewListOptions(options...)
 	clusters := &ClusterList{}
 	if opts.LabelSelector == nil || opts.LabelSelector.Empty() {
 		opts.LabelSelector = labels.NewSelector()

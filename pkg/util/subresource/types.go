@@ -19,6 +19,9 @@ package subresource
 import (
 	"fmt"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 const (
@@ -46,4 +49,17 @@ func NewCompoundName(name string) *CompoundName {
 	}
 	parts := strings.SplitN(name, CompoundNameSeparator, 2)
 	return &CompoundName{ParentResourceName: parts[1], SubResourceName: parts[0]}
+}
+
+// GetParentResourceNameFromLabelSelector retrieve parent resource key from label selector
+func GetParentResourceNameFromLabelSelector(sel labels.Selector, parentResourceKey string) string {
+	requirements, _ := sel.Requirements()
+	for _, r := range requirements {
+		if r.Key() == parentResourceKey {
+			if r.Operator() == selection.Equals && len(r.Values().List()) == 1 {
+				return r.Values().List()[0]
+			}
+		}
+	}
+	return DefaultParentResourceName
 }

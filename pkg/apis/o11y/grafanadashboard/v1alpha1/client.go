@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -25,6 +26,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/subresource"
 )
 
@@ -32,7 +34,7 @@ import (
 // +kubebuilder:object:generate=false
 type GrafanaDashboardClient interface {
 	Get(ctx context.Context, name string) (*GrafanaDashboard, error)
-	//List(ctx context.Context, options ...client.ListOption) (*GrafanaDashboardList, error)
+	List(ctx context.Context, options ...client.ListOption) (*GrafanaDashboardList, error)
 	Create(ctx context.Context, GrafanaDashboard *GrafanaDashboard) error
 	Update(ctx context.Context, GrafanaDashboard *GrafanaDashboard) error
 	Delete(ctx context.Context, GrafanaDashboard *GrafanaDashboard) error
@@ -40,9 +42,7 @@ type GrafanaDashboardClient interface {
 
 // NewGrafanaDashboardClient create GrafanaDashboardClient
 func NewGrafanaDashboardClient(cli client.Client) GrafanaDashboardClient {
-	return &grafanaDashboardClient{
-		GrafanaClient: grafanav1alpha1.NewGrafanaClient(cli),
-	}
+	return &grafanaDashboardClient{grafanav1alpha1.NewGrafanaClient(cli)}
 }
 
 type grafanaDashboardClient struct {
@@ -59,7 +59,7 @@ func (in *grafanaDashboardClient) Get(ctx context.Context, name string) (*Grafan
 		WithPathFunc(func() (string, error) {
 			return "/api/dashboards/uid/" + url.PathEscape(resourceName.SubResourceName), nil
 		}).
-		WithOnSuccess(dashboard.FromBody).
+		WithOnSuccess(dashboard.FromResponseBody).
 		Do(ctx, in.GrafanaClient)
 }
 
@@ -69,7 +69,7 @@ func (in *grafanaDashboardClient) Create(ctx context.Context, dashboard *Grafana
 		WithPathFunc(func() (string, error) {
 			return "/api/dashboards/db", nil
 		}).
-		WithBodyFunc(dashboard.ToBody).
+		WithBodyFunc(dashboard.ToRequestBody).
 		Do(ctx, in.GrafanaClient)
 }
 
@@ -83,6 +83,22 @@ func (in *grafanaDashboardClient) Delete(ctx context.Context, dashboard *Grafana
 		WithMethod(http.MethodDelete).
 		WithPathFunc(func() (string, error) {
 			return "/api/dashboards/uid/" + url.PathEscape(resourceName.SubResourceName), nil
+		}).
+		Do(ctx, in.GrafanaClient)
+}
+
+func (in *grafanaDashboardClient) List(ctx context.Context, options ...client.ListOption) (*GrafanaDashboardList, error) {
+	opts := apiserver.NewListOptions(options...)
+	parentResourceName := subresource.GetParentResourceNameFromLabelSelector(opts.LabelSelector, "grafana")
+	params := apiserver.BuildQueryParamsFromLabelSelector(opts.LabelSelector, "query", "tag", "folderIds", "dashboardIds", "starred")
+	dashboards := &GrafanaDashboardList{}
+	return dashboards, grafanav1alpha1.NewGrafanaSubResourceRequest(&grafanav1alpha1.Grafana{}, (&subresource.CompoundName{ParentResourceName: parentResourceName}).String()).
+		WithMethod(http.MethodGet).
+		WithPathFunc(func() (string, error) {
+			return fmt.Sprintf("/api/search?type=dash-db%s", params), nil
+		}).
+		WithOnSuccess(func(respBody []byte) error {
+			return dashboards.FromResponseBody(respBody, parentResourceName)
 		}).
 		Do(ctx, in.GrafanaClient)
 }

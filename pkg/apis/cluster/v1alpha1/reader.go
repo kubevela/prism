@@ -26,11 +26,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
@@ -41,11 +41,7 @@ func (in *Cluster) Get(ctx context.Context, name string, options *metav1.GetOpti
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (in *Cluster) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	sel := labels.NewSelector()
-	if options != nil && options.LabelSelector != nil && !options.LabelSelector.Empty() {
-		sel = options.LabelSelector
-	}
-	return NewClusterClient(singleton.GetKubeClient()).List(ctx, client.MatchingLabelsSelector{Selector: sel})
+	return NewClusterClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
 }
 
 func extractLabels(labels map[string]string) map[string]string {

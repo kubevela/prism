@@ -19,12 +19,14 @@ package v1alpha1
 import (
 	"context"
 
+	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
@@ -51,6 +53,7 @@ var _ rest.Getter = &GrafanaDatasource{}
 var _ rest.CreaterUpdater = &GrafanaDatasource{}
 var _ rest.Patcher = &GrafanaDatasource{}
 var _ rest.GracefulDeleter = &GrafanaDatasource{}
+var _ rest.Lister = &GrafanaDatasource{}
 
 // GetObjectMeta returns the object meta reference.
 func (in *GrafanaDatasource) GetObjectMeta() *metav1.ObjectMeta {
@@ -93,32 +96,31 @@ func (in *GrafanaDatasource) Get(ctx context.Context, name string, options *meta
 }
 
 func (in *GrafanaDatasource) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
-	datasource := obj.(*GrafanaDatasource)
-	return datasource, NewGrafanaDatasourceClient(singleton.GetKubeClient()).Create(ctx, datasource)
+	return obj, NewGrafanaDatasourceClient(singleton.GetKubeClient()).Create(ctx, obj.(*GrafanaDatasource))
 }
 
-func (in *GrafanaDatasource) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
+func (in *GrafanaDatasource) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (obj runtime.Object, _ bool, err error) {
 	cli := NewGrafanaDatasourceClient(singleton.GetKubeClient())
-	datasource, err := cli.Get(ctx, name)
-	if err != nil {
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	obj, err := objInfo.UpdatedObject(ctx, datasource)
-	if err != nil {
+	if obj, err = objInfo.UpdatedObject(ctx, obj); err != nil {
 		return nil, false, err
 	}
-	datasource = obj.(*GrafanaDatasource)
-	err = cli.Update(ctx, datasource)
-	return datasource, false, err
+	return obj, false, cli.Update(ctx, obj.(*GrafanaDatasource))
 }
 
-func (in *GrafanaDatasource) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
+func (in *GrafanaDatasource) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (obj runtime.Object, _ bool, err error) {
 	cli := NewGrafanaDatasourceClient(singleton.GetKubeClient())
-	datasource, err := cli.Get(ctx, name)
-	if err != nil {
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	return datasource, true, cli.Delete(ctx, datasource)
+	return obj, true, cli.Delete(ctx, obj.(*GrafanaDatasource))
 }
 
-// TODO support list datasource
+func (in *GrafanaDatasource) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
+	if name := apiserver.GetMetadataNameInFieldSelectorFromInternalVersionListOptions(options); name != nil {
+		return NewGrafanaDatasourceClient(singleton.GetKubeClient()).Get(ctx, *name)
+	}
+	return NewGrafanaDatasourceClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
+}

@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/subresource"
 )
 
@@ -34,7 +35,7 @@ import (
 // +kubebuilder:object:generate=false
 type GrafanaDatasourceClient interface {
 	Get(ctx context.Context, name string) (*GrafanaDatasource, error)
-	//List(ctx context.Context, options ...client.ListOption) (*GrafanaDatasourceList, error)
+	List(ctx context.Context, options ...client.ListOption) (*GrafanaDatasourceList, error)
 	Create(ctx context.Context, grafanaDatasource *GrafanaDatasource) error
 	Update(ctx context.Context, grafanaDatasource *GrafanaDatasource) error
 	Delete(ctx context.Context, grafanaDatasource *GrafanaDatasource) error
@@ -42,9 +43,7 @@ type GrafanaDatasourceClient interface {
 
 // NewGrafanaDatasourceClient create GrafanaDatasourceClient
 func NewGrafanaDatasourceClient(cli client.Client) GrafanaDatasourceClient {
-	return &grafanaDatasourceClient{
-		GrafanaClient: grafanav1alpha1.NewGrafanaClient(cli),
-	}
+	return &grafanaDatasourceClient{grafanav1alpha1.NewGrafanaClient(cli)}
 }
 
 type grafanaDatasourceClient struct {
@@ -59,10 +58,9 @@ func (in *grafanaDatasourceClient) Get(ctx context.Context, name string) (*Grafa
 	return datasource, grafanav1alpha1.NewGrafanaSubResourceRequest(datasource, name).
 		WithMethod(http.MethodGet).
 		WithPathFunc(func() (string, error) {
-			return "/api/datasources/name/" + url.PathEscape(resourceName.SubResourceName), nil
+			return "/api/datasources/uid/" + url.PathEscape(resourceName.SubResourceName), nil
 		}).
 		WithOnSuccess(func(respBody []byte) error {
-			datasource.UID = ""
 			datasource.Spec = runtime.RawExtension{Raw: respBody}
 			return nil
 		}).
@@ -78,9 +76,7 @@ func (in *grafanaDatasourceClient) Create(ctx context.Context, datasource *Grafa
 		WithBodyFunc(func() ([]byte, error) {
 			return datasource.Spec.Raw, nil
 		}).
-		WithOnSuccess(func(respBody []byte) error {
-			return datasource.FromGrafanaAPIResponse(respBody)
-		}).
+		WithOnSuccess(datasource.FromResponseBody).
 		Do(ctx, in.GrafanaClient)
 }
 
@@ -88,18 +84,13 @@ func (in *grafanaDatasourceClient) Update(ctx context.Context, datasource *Grafa
 	return grafanav1alpha1.NewGrafanaSubResourceRequest(datasource, datasource.GetName()).
 		WithMethod(http.MethodPut).
 		WithPathFunc(func() (string, error) {
-			id, err := datasource.GetGrafanaDatasourceID()
-			if err != nil {
-				return "", err
-			}
-			return fmt.Sprintf("/api/datasources/%d", id), nil
+			id, err := datasource.GetID()
+			return fmt.Sprintf("/api/datasources/%d", id), err
 		}).
 		WithBodyFunc(func() ([]byte, error) {
 			return datasource.Spec.Raw, nil
 		}).
-		WithOnSuccess(func(respBody []byte) error {
-			return datasource.FromGrafanaAPIResponse(respBody)
-		}).
+		WithOnSuccess(datasource.FromResponseBody).
 		Do(ctx, in.GrafanaClient)
 }
 
@@ -107,7 +98,22 @@ func (in *grafanaDatasourceClient) Delete(ctx context.Context, datasource *Grafa
 	return grafanav1alpha1.NewGrafanaSubResourceRequest(datasource, datasource.GetName()).
 		WithMethod(http.MethodDelete).
 		WithPathFunc(func() (string, error) {
-			return "/api/datasources/name/" + subresource.NewCompoundName(datasource.GetName()).SubResourceName, nil
+			return "/api/datasources/uid/" + subresource.NewCompoundName(datasource.GetName()).SubResourceName, nil
+		}).
+		Do(ctx, in.GrafanaClient)
+}
+
+func (in *grafanaDatasourceClient) List(ctx context.Context, options ...client.ListOption) (*GrafanaDatasourceList, error) {
+	opts := apiserver.NewListOptions(options...)
+	parentResourceName := subresource.GetParentResourceNameFromLabelSelector(opts.LabelSelector, "grafana")
+	datasources := &GrafanaDatasourceList{}
+	return datasources, grafanav1alpha1.NewGrafanaSubResourceRequest(&grafanav1alpha1.Grafana{}, (&subresource.CompoundName{ParentResourceName: parentResourceName}).String()).
+		WithMethod(http.MethodGet).
+		WithPathFunc(func() (string, error) {
+			return "/api/datasources", nil
+		}).
+		WithOnSuccess(func(respBody []byte) error {
+			return datasources.FromResponseBody(respBody, parentResourceName)
 		}).
 		Do(ctx, in.GrafanaClient)
 }

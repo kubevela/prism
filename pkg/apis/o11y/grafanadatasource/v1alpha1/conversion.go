@@ -20,14 +20,24 @@ import (
 	"encoding/json"
 
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/kubevela/prism/pkg/util/subresource"
 )
 
-// FromGrafanaAPIResponse load datasource from grafana api response
-func (in *GrafanaDatasource) FromGrafanaAPIResponse(resp []byte) error {
+// GetID get id from GrafanaDatasource
+func (in *GrafanaDatasource) GetID() (int, error) {
+	obj := struct {
+		ID int `json:"id"`
+	}{}
+	return obj.ID, json.Unmarshal(in.Spec.Raw, &obj)
+}
+
+// FromResponseBody load datasource from grafana api create/update response
+func (in *GrafanaDatasource) FromResponseBody(respBody []byte) error {
 	obj := &struct {
 		DataSource map[string]interface{} `json:"datasource"`
 	}{}
-	if err := json.Unmarshal(resp, obj); err != nil {
+	if err := json.Unmarshal(respBody, obj); err != nil {
 		return err
 	}
 	bs, err := json.Marshal(obj.DataSource)
@@ -38,13 +48,22 @@ func (in *GrafanaDatasource) FromGrafanaAPIResponse(resp []byte) error {
 	return err
 }
 
-// GetGrafanaDatasourceID get datasource ID in grafana
-func (in *GrafanaDatasource) GetGrafanaDatasourceID() (uint, error) {
-	obj := &struct {
-		ID uint `json:"id"`
-	}{}
-	if err := json.Unmarshal(in.Spec.Raw, obj); err != nil {
-		return 0, err
+// FromResponseBody load datasources from grafana api
+func (in *GrafanaDatasourceList) FromResponseBody(respBody []byte, parentResourceName string) error {
+	data := []map[string]interface{}{}
+	if err := json.Unmarshal(respBody, &data); err != nil {
+		return err
 	}
-	return obj.ID, nil
+	in.Items = []GrafanaDatasource{}
+	for _, raw := range data {
+		ds := &GrafanaDatasource{}
+		ds.SetName((&subresource.CompoundName{ParentResourceName: parentResourceName, SubResourceName: raw["uid"].(string)}).String())
+		bs, err := json.Marshal(raw)
+		if err != nil {
+			return err
+		}
+		ds.Spec = runtime.RawExtension{Raw: bs}
+		in.Items = append(in.Items, *ds)
+	}
+	return nil
 }

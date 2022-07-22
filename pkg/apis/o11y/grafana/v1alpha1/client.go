@@ -24,6 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/prism/pkg/apis/o11y/config"
+	"github.com/kubevela/prism/pkg/util/apiserver"
 )
 
 // GrafanaClient client for operate grafana
@@ -62,10 +63,8 @@ func (c *grafanaClient) Get(ctx context.Context, name string) (*Grafana, error) 
 }
 
 func (c *grafanaClient) List(ctx context.Context, options ...client.ListOption) (*GrafanaList, error) {
-	opts := &client.ListOptions{Namespace: config.ObservabilityNamespace}
-	for _, opt := range options {
-		opt.ApplyToList(opts)
-	}
+	opts := apiserver.NewListOptions(options...)
+	opts.Namespace = config.ObservabilityNamespace
 	secrets := &corev1.SecretList{}
 	if err := c.Client.List(ctx, secrets, opts); err != nil {
 		return nil, err

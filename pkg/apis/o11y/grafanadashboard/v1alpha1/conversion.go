@@ -31,8 +31,8 @@ const (
 	grafanaDashboardFolderUidLabelKey = "o11y.oam.dev/grafana-dashboard-folder-uid"
 )
 
-// ToBody convert object into body for request
-func (in *GrafanaDashboard) ToBody() ([]byte, error) {
+// ToRequestBody convert object into body for request
+func (in *GrafanaDashboard) ToRequestBody() ([]byte, error) {
 	dashboard := map[string]interface{}{}
 	if err := json.Unmarshal(in.Spec.Raw, &dashboard); err != nil {
 		return nil, err
@@ -40,22 +40,22 @@ func (in *GrafanaDashboard) ToBody() ([]byte, error) {
 	dashboard["uid"] = subresource.NewCompoundName(in.GetName()).SubResourceName
 	data := map[string]interface{}{"dashboard": dashboard}
 	if labels := in.GetLabels(); labels != nil {
-		if labels[grafanaDashboardFolderIdLabelKey] != "" {
-			id, err := strconv.Atoi(labels[grafanaDashboardFolderIdLabelKey])
+		if raw := labels[grafanaDashboardFolderIdLabelKey]; raw != "" {
+			id, err := strconv.Atoi(raw)
 			if err != nil {
 				return nil, err
 			}
 			data["folderId"] = id
 		}
-		if labels[grafanaDashboardFolderUidLabelKey] != "" {
-			data["folderUid"] = labels[grafanaDashboardFolderUidLabelKey]
+		if raw := labels[grafanaDashboardFolderUidLabelKey]; raw != "" {
+			data["folderUid"] = raw
 		}
 	}
 	return json.Marshal(data)
 }
 
-// FromBody convert response into object
-func (in *GrafanaDashboard) FromBody(body []byte) error {
+// FromResponseBody convert response into object
+func (in *GrafanaDashboard) FromResponseBody(body []byte) error {
 	data := map[string]interface{}{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		return err
@@ -65,7 +65,40 @@ func (in *GrafanaDashboard) FromBody(body []byte) error {
 		return fmt.Errorf("no dashboard found in response body")
 	}
 	delete(dashboard, "uid")
-	if meta, ok := data["meta"].(map[string]interface{}); ok {
+	meta, _ := data["meta"].(map[string]interface{})
+	return in.load(dashboard, meta)
+}
+
+// FromResponseBody convert response into objects
+func (in *GrafanaDashboardList) FromResponseBody(body []byte, parentResourceName string) error {
+	var data []map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return err
+	}
+	in.Items = make([]GrafanaDashboard, len(data))
+	for idx, raw := range data {
+		gdb := &GrafanaDashboard{}
+		uid, ok := raw["uid"].(string)
+		if !ok {
+			return fmt.Errorf("invalid dashboard response, no valid uid found")
+		}
+		gdb.SetName((&subresource.CompoundName{ParentResourceName: parentResourceName, SubResourceName: uid}).String())
+		dashboard := map[string]interface{}{}
+		for _, key := range []string{"title", "id", "tags"} {
+			if raw[key] != nil {
+				dashboard[key] = raw[key]
+			}
+		}
+		if err := gdb.load(dashboard, raw); err != nil {
+			return err
+		}
+		in.Items[idx] = *gdb
+	}
+	return nil
+}
+
+func (in *GrafanaDashboard) load(dashboard map[string]interface{}, meta map[string]interface{}) error {
+	if meta != nil {
 		labels := in.GetLabels()
 		if labels == nil {
 			labels = map[string]string{}

@@ -19,12 +19,14 @@ package v1alpha1
 import (
 	"context"
 
+	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
@@ -51,6 +53,7 @@ var _ rest.Getter = &GrafanaDashboard{}
 var _ rest.CreaterUpdater = &GrafanaDashboard{}
 var _ rest.Patcher = &GrafanaDashboard{}
 var _ rest.GracefulDeleter = &GrafanaDashboard{}
+var _ rest.Lister = &GrafanaDashboard{}
 
 // GetObjectMeta returns the object meta reference.
 func (in *GrafanaDashboard) GetObjectMeta() *metav1.ObjectMeta {
@@ -93,32 +96,31 @@ func (in *GrafanaDashboard) Get(ctx context.Context, name string, options *metav
 }
 
 func (in *GrafanaDashboard) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
-	gdb := obj.(*GrafanaDashboard)
-	return gdb, NewGrafanaDashboardClient(singleton.GetKubeClient()).Create(ctx, gdb)
+	return obj, NewGrafanaDashboardClient(singleton.GetKubeClient()).Create(ctx, obj.(*GrafanaDashboard))
 }
 
-func (in *GrafanaDashboard) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
+func (in *GrafanaDashboard) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (obj runtime.Object, _ bool, err error) {
 	cli := NewGrafanaDashboardClient(singleton.GetKubeClient())
-	gdb, err := cli.Get(ctx, name)
-	if err != nil {
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	obj, err := objInfo.UpdatedObject(ctx, gdb)
-	if err != nil {
+	if obj, err = objInfo.UpdatedObject(ctx, obj); err != nil {
 		return nil, false, err
 	}
-	gdb = obj.(*GrafanaDashboard)
-	err = cli.Update(ctx, gdb)
-	return gdb, false, err
+	return obj, false, cli.Update(ctx, obj.(*GrafanaDashboard))
 }
 
-func (in *GrafanaDashboard) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
+func (in *GrafanaDashboard) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (obj runtime.Object, _ bool, err error) {
 	cli := NewGrafanaDashboardClient(singleton.GetKubeClient())
-	gdb, err := cli.Get(ctx, name)
-	if err != nil {
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	return gdb, true, cli.Delete(ctx, gdb)
+	return obj, true, cli.Delete(ctx, obj.(*GrafanaDashboard))
 }
 
-// TODO support list datasource
+func (in *GrafanaDashboard) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
+	if name := apiserver.GetMetadataNameInFieldSelectorFromInternalVersionListOptions(options); name != nil {
+		return NewGrafanaDashboardClient(singleton.GetKubeClient()).Get(ctx, *name)
+	}
+	return NewGrafanaDashboardClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
+}

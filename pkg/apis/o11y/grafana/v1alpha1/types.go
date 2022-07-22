@@ -21,13 +21,12 @@ import (
 
 	metainternalversion "k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kubevela/prism/pkg/util/apiserver"
 	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
@@ -124,44 +123,33 @@ func (in *Grafana) Get(ctx context.Context, name string, options *metav1.GetOpti
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (in *Grafana) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	sel := labels.NewSelector()
-	if options != nil && options.LabelSelector != nil && !options.LabelSelector.Empty() {
-		sel = options.LabelSelector
-	}
-	return NewGrafanaClient(singleton.GetKubeClient()).List(ctx, client.MatchingLabelsSelector{Selector: sel})
+	return NewGrafanaClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
 }
 
 // Create creates a new version of a resource.
 func (in *Grafana) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
-	grafana := obj.(*Grafana)
-	return grafana, NewGrafanaClient(singleton.GetKubeClient()).Create(ctx, grafana)
+	return obj, NewGrafanaClient(singleton.GetKubeClient()).Create(ctx, obj.(*Grafana))
 }
 
 // Update finds a resource in the storage and updates it.
-func (in *Grafana) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
-	gfClient := NewGrafanaClient(singleton.GetKubeClient())
-	grafana, err := gfClient.Get(ctx, name)
-	if err != nil {
+func (in *Grafana) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (obj runtime.Object, _ bool, err error) {
+	cli := NewGrafanaClient(singleton.GetKubeClient())
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	obj, err := objInfo.UpdatedObject(ctx, grafana)
-	if err != nil {
+	if obj, err = objInfo.UpdatedObject(ctx, obj); err != nil {
 		return nil, false, err
 	}
-	grafana = obj.(*Grafana)
-	err = gfClient.Update(ctx, grafana)
-	return grafana, false, err
+	return obj, false, cli.Update(ctx, obj.(*Grafana))
 }
 
 // Delete finds a resource in the storage and deletes it.
-func (in *Grafana) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (runtime.Object, bool, error) {
-	gfClient := NewGrafanaClient(singleton.GetKubeClient())
-	grafana, err := gfClient.Get(ctx, name)
-	if err != nil {
+func (in *Grafana) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (obj runtime.Object, _ bool, err error) {
+	cli := NewGrafanaClient(singleton.GetKubeClient())
+	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
-	err = gfClient.Delete(ctx, grafana)
-	return grafana, true, err
+	return obj, true, cli.Delete(ctx, obj.(*Grafana))
 }
 
 // TODO add access check subresource
