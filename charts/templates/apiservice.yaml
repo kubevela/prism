@@ -19,3 +19,25 @@ spec:
   {{ if .Values.secureTLS.enabled }}
   caBundle: Cg==
   {{ end }}
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.o11y.prism.oam.dev
+  labels:
+    api: kuebvela-vela-prism
+    apiserver: "true"
+    {{- include "vela-prism.labels" . | nindent 4 }}
+spec:
+  version: v1alpha1
+  group: o11y.prism.oam.dev
+  groupPriorityMinimum: 2000
+  service:
+    name: {{ .Release.Name }}
+    namespace: {{ .Release.Namespace }}
+    port: {{ .Values.port }}
+  versionPriority: 10
+  insecureSkipTLSVerify: {{ not .Values.secureTLS.enabled }}
+  {{ if .Values.secureTLS.enabled }}
+  caBundle: Cg==
+  {{ end }}

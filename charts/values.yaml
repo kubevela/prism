@@ -40,5 +40,5 @@ secureTLS:
   certPatch:
     image:
       repository: oamdev/cluster-gateway
-      tag: v1.3.2
+      tag: v1.4.0
       pullPolicy: IfNotPresent
