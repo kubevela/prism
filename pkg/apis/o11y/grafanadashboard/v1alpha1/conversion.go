@@ -64,7 +64,6 @@ func (in *GrafanaDashboard) FromResponseBody(body []byte) error {
 	if !ok {
 		return fmt.Errorf("no dashboard found in response body")
 	}
-	delete(dashboard, "uid")
 	meta, _ := data["meta"].(map[string]interface{})
 	return in.load(dashboard, meta)
 }
@@ -103,8 +102,8 @@ func (in *GrafanaDashboard) load(dashboard map[string]interface{}, meta map[stri
 		if labels == nil {
 			labels = map[string]string{}
 		}
-		if id, validId := meta["folderId"].(int); validId {
-			labels[grafanaDashboardFolderIdLabelKey] = strconv.Itoa(id)
+		if id, validId := meta["folderId"].(float64); validId {
+			labels[grafanaDashboardFolderIdLabelKey] = strconv.Itoa(int(id))
 		}
 		if uid, validUid := meta["folderUid"].(string); validUid {
 			labels[grafanaDashboardFolderUidLabelKey] = uid

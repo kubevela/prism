@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -57,7 +58,11 @@ func (in *GrafanaDatasourceList) FromResponseBody(respBody []byte, parentResourc
 	in.Items = []GrafanaDatasource{}
 	for _, raw := range data {
 		ds := &GrafanaDatasource{}
-		ds.SetName((&subresource.CompoundName{ParentResourceName: parentResourceName, SubResourceName: raw["uid"].(string)}).String())
+		uid, ok := raw["uid"].(string)
+		if !ok {
+			return fmt.Errorf("invalid grafana datasource response, no valid uid found")
+		}
+		ds.SetName((&subresource.CompoundName{ParentResourceName: parentResourceName, SubResourceName: uid}).String())
 		bs, err := json.Marshal(raw)
 		if err != nil {
 			return err
