@@ -82,13 +82,3 @@ func GetStringFromRawExtension(data *runtime.RawExtension, path ...string) (val 
 	}
 	return val
 }
-
-// GetFieldFromRawExtension load int from raw extension
-func GetFieldFromRawExtension(data *runtime.RawExtension, path ...string) (val interface{}) {
-	if data != nil && data.Raw != nil {
-		m := map[string]interface{}{}
-		_ = json.Unmarshal(data.Raw, &m)
-		val, _, _ = unstructured.NestedFieldNoCopy(m, path...)
-	}
-	return val
-}
