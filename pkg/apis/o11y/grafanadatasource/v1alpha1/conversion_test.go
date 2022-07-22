@@ -20,7 +20,20 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
+
+func TestGrafanaDatasourceToRequestBody(t *testing.T) {
+	in := &GrafanaDatasource{ObjectMeta: metav1.ObjectMeta{Name: "test"}}
+	in.Spec = runtime.RawExtension{Raw: []byte(`bad`)}
+	_, err := in.ToRequestBody()
+	require.NotNil(t, err)
+	in.Spec = runtime.RawExtension{Raw: []byte(`{"key":"val"}`)}
+	bs, err := in.ToRequestBody()
+	require.NoError(t, err)
+	require.Equal(t, []byte(`{"key":"val","uid":"test"}`), bs)
+}
 
 func TestGrafanaDatasourceFromResponseBody(t *testing.T) {
 	in := &GrafanaDatasource{}

@@ -33,6 +33,16 @@ func (in *GrafanaDatasource) GetID() (int, error) {
 	return obj.ID, json.Unmarshal(in.Spec.Raw, &obj)
 }
 
+// ToRequestBody convert object into body for request
+func (in *GrafanaDatasource) ToRequestBody() ([]byte, error) {
+	datasource := map[string]interface{}{}
+	if err := json.Unmarshal(in.Spec.Raw, &datasource); err != nil {
+		return nil, err
+	}
+	datasource["uid"] = subresource.NewCompoundName(in.GetName()).SubResourceName
+	return json.Marshal(datasource)
+}
+
 // FromResponseBody load datasource from grafana api create/update response
 func (in *GrafanaDatasource) FromResponseBody(respBody []byte) error {
 	obj := &struct {

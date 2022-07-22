@@ -73,9 +73,7 @@ func (in *grafanaDatasourceClient) Create(ctx context.Context, datasource *Grafa
 		WithPathFunc(func() (string, error) {
 			return "/api/datasources/", nil
 		}).
-		WithBodyFunc(func() ([]byte, error) {
-			return datasource.Spec.Raw, nil
-		}).
+		WithBodyFunc(datasource.ToRequestBody).
 		WithOnSuccess(datasource.FromResponseBody).
 		Do(ctx, in.GrafanaClient)
 }
@@ -87,9 +85,7 @@ func (in *grafanaDatasourceClient) Update(ctx context.Context, datasource *Grafa
 			id, err := datasource.GetID()
 			return fmt.Sprintf("/api/datasources/%d", id), err
 		}).
-		WithBodyFunc(func() ([]byte, error) {
-			return datasource.Spec.Raw, nil
-		}).
+		WithBodyFunc(datasource.ToRequestBody).
 		WithOnSuccess(datasource.FromResponseBody).
 		Do(ctx, in.GrafanaClient)
 }
