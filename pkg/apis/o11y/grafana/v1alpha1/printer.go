@@ -66,7 +66,7 @@ var (
 		{Name: "Name", Type: "string", Format: "name", Description: "the name of the Grafana"},
 		{Name: "Endpoint", Type: "string", Description: "the endpoint"},
 		{Name: "Credential_Type", Type: "string", Description: "the credential type"},
-		{Name: "Labels", Type: "string", Description: "the labels of the Grafana"},
+		{Name: "Labels", Type: "string", Description: "the labels of the Grafana", Priority: 10},
 		{Name: "Creation_Timestamp", Type: "dateTime", Description: "the creation timestamp of the Grafana", Priority: 10},
 	}
 )

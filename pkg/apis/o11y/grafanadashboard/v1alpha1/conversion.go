@@ -38,6 +38,7 @@ func (in *GrafanaDashboard) ToRequestBody() ([]byte, error) {
 		return nil, err
 	}
 	dashboard["uid"] = subresource.NewCompoundName(in.GetName()).SubResourceName
+	delete(dashboard, "id")
 	data := map[string]interface{}{"dashboard": dashboard}
 	if labels := in.GetLabels(); labels != nil {
 		if raw := labels[grafanaDashboardFolderIdLabelKey]; raw != "" {
