@@ -56,3 +56,99 @@ Therefore, the credential information will be secured and the user can also use 
 After installing vela-prism in your cluster, you can run `kubectl get vela-clusters` to view all the installed clusters.
 
 > Notice that the vela-prism bootstrap parameter contains `--storage-namespace`, which identifies the underlying namespace for storing cluster secrets and the OCM managed cluster.
+
+### Grafana related APIs
+
+![PrismGrafanaArch](https://github.com/kubevela/prism/blob/master/hack/prism-grafana-arch.jpg)
+
+#### Grafana
+
+In vela-prism, you can store grafana access into Grafana object. The Grafana object is projected into secrets in `o11y-system` (this can be configured through `--observability-namespace` parameter).
+The secret embeds the access endpoint and credential (either username/password for BasicAuth or token for BearerToken) for grafana. These will be used for communicating with Grafana APIs. Example of Grafana object is shown below.
+
+```yaml
+apiVersion: o11y.prism.oam.dev/v1alpha1
+kind: Grafana
+metadata:
+  name: example
+spec:
+  access:
+    username: admin
+    password: kubevela
+  endpoint: https://grafana.o11y-system:3000/
+```
+
+#### GrafanaDashboard & GrafanaDatasource
+
+After creating the Grafana object into the control plane, you are now able to manipulate Grafana resources through Kubernetes APIs now. 
+Currently, vela-prism provides proxies for GrafanaDatasource and GrafanaDashboard.
+Their names are constructed by two parts, its original name and the backend grafana name. 
+
+For example, you can create a new GrafanaDashboard by applying the following YAML file. This will use the Grafana object above as the access credential, and call the Grafana APIs to create a new dashboard.
+
+You can also update or delete dashboards or datasources. The spec part of GrafanaDashboard and GrafanaDatasource are directly projected into API request body.
+
+```yaml
+apiVersion: o11y.prism.oam.dev/v1alpha1
+kind: GrafanaDashboard
+metadata:
+  name: dashboard-test@example
+spec:
+  title: New dashboard
+  tags: []
+  style: dark
+  timezone: browser
+  editable: true
+  hideControls: false
+  graphTooltip: 1
+  panels: []
+  time:
+    from: now-6h
+    to: now
+  timepicker:
+    time_options: []
+    refresh_intervals: []
+  templating:
+    list: []
+  annotations:
+    list: []
+  refresh: 5s
+  schemaVersion: 17
+  version: 0
+  links: []
+```
+
+Another example for GrafanaDatasource.
+
+```yaml
+apiVersion: o11y.prism.oam.dev/v1alpha1
+kind: GrafanaDatasource
+metadata:
+  name: prom-test@example
+spec:
+  access: proxy
+  basicAuth: false
+  isDefault: false
+  name: ExamplePrometheus
+  readOnly: true
+  type: prometheus
+  url: https://prometheus-server.o11y-system:9090
+```
+
+#### verse operator pattern
+
+To operate Grafana instances in Kubernetes, there are also [Grafana operators](https://github.com/grafana-operator/grafana-operator) to help manage Grafana configurations.
+
+Compared to operator pattern, the aggregator pattern has pros and cons.
+
+##### Pros
+- There is no data consistency problem between the CustomResource and the Grafana underlying storage.
+- API requests are made in time. The response is also immediate. No need for checking CustomResource status repeatedly.
+- No reconciles. No need to hold CPUs and memories as controller does.
+- Easy to connect with third-party Grafana instance. For example, Grafana from cloud providers.
+
+##### Cons
+- Cannot persist data outside Grafana storage. Once grafana is broken, the CustomResource will be unavailable as well.
+
+The main drawback for vela-prism compared to operator pattern is that it cannot persist configurations. However, this can be solved through using KubeVela application to manage those configurations.
+For example, you can write KubeVela applications to hold the dashboard configurations, instead of create another separate CustomResource. With KubeVela application, leverage GitOps is also possible.
