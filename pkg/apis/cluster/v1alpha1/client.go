@@ -125,7 +125,7 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 	// filter clusters
 	var items []Cluster
 	for _, cluster := range clusters.Items {
-		if opts.LabelSelector.Matches(labels.Set(cluster.GetLabels())) {
+		if opts.LabelSelector == nil || opts.LabelSelector.Matches(labels.Set(cluster.GetLabels())) {
 			items = append(items, cluster)
 		}
 	}
@@ -153,10 +153,12 @@ type clusterSelector struct {
 // ApplyToList applies this configuration to the given list options.
 func (m clusterSelector) ApplyToList(opts *client.ListOptions) {
 	opts.LabelSelector = labels.NewSelector()
-	requirements, _ := m.Selector.Requirements()
-	for _, r := range requirements {
-		if !slices.Contains([]string{LabelClusterControlPlane}, r.Key()) {
-			opts.LabelSelector = opts.LabelSelector.Add(r)
+	if m.Selector != nil {
+		requirements, _ := m.Selector.Requirements()
+		for _, r := range requirements {
+			if !slices.Contains([]string{LabelClusterControlPlane}, r.Key()) {
+				opts.LabelSelector = opts.LabelSelector.Add(r)
+			}
 		}
 	}
 	if m.RequireCredentialType {
