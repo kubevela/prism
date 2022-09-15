@@ -36,6 +36,9 @@ const (
 var (
 	// AnnotationClusterAlias the annotation key for cluster alias
 	AnnotationClusterAlias = config.MetaApiGroupName + "/cluster-alias"
+
+	// LabelClusterControlPlane identifies whether the cluster is the control plane
+	LabelClusterControlPlane = config.MetaApiGroupName + "/control-plane"
 )
 
 // StorageNamespace refers to the namespace of cluster secret, usually same as the core kubevela system namespace

@@ -169,6 +169,27 @@ var _ = Describe("Test Cluster API", func() {
 		Expect(clusters.Items[0].Name).To(Equal("ocm-cluster"))
 		Expect(clusters.Items[1].Name).To(Equal("test-cluster"))
 
+		By("Test list clusters that are not control plane")
+		objs, err = c.List(ctx, &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromSet(map[string]string{
+			LabelClusterControlPlane: "false",
+		})})
+		Ω(err).To(Succeed())
+		clusters, ok = objs.(*ClusterList)
+		Ω(ok).To(BeTrue())
+		Expect(len(clusters.Items)).To(Equal(2))
+		Expect(clusters.Items[0].Name).To(Equal("ocm-cluster"))
+		Expect(clusters.Items[1].Name).To(Equal("test-cluster"))
+
+		By("Test list clusters that is control plane")
+		objs, err = c.List(ctx, &metainternalversion.ListOptions{LabelSelector: labels.SelectorFromSet(map[string]string{
+			LabelClusterControlPlane: "true",
+		})})
+		Ω(err).To(Succeed())
+		clusters, ok = objs.(*ClusterList)
+		Ω(ok).To(BeTrue())
+		Expect(len(clusters.Items)).To(Equal(1))
+		Expect(clusters.Items[0].Name).To(Equal("local"))
+
 		By("Test print table")
 		_, err = c.ConvertToTable(ctx, cluster, nil)
 		Ω(err).To(Succeed())

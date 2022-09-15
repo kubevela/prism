@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	clustergatewayv1alpha1 "github.com/oam-dev/cluster-gateway/pkg/apis/cluster/v1alpha1"
@@ -67,6 +68,7 @@ func newCluster(obj client.Object) *Cluster {
 	}
 	cluster.Spec.Accepted = true
 	cluster.Spec.Endpoint = ClusterBlankEndpoint
+	metav1.SetMetaDataLabel(&cluster.ObjectMeta, LabelClusterControlPlane, fmt.Sprintf("%t", obj == nil))
 	return cluster
 }
 

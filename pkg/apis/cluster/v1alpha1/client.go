@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/utils/strings/slices"
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -94,12 +95,8 @@ func (c *clusterClient) Get(ctx context.Context, name string) (*Cluster, error) 
 
 func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) (*ClusterList, error) {
 	opts := apiserver.NewListOptions(options...)
-	clusters := &ClusterList{}
-	if opts.LabelSelector == nil || opts.LabelSelector.Empty() {
-		opts.LabelSelector = labels.NewSelector()
-		local := NewLocalCluster()
-		clusters.Items = []Cluster{*local}
-	}
+	local := NewLocalCluster()
+	clusters := &ClusterList{Items: []Cluster{*local}}
 
 	secrets := &corev1.SecretList{}
 	err := c.Client.List(ctx, secrets, clusterSelector{Selector: opts.LabelSelector, RequireCredentialType: true})
@@ -124,6 +121,17 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 			}
 		}
 	}
+
+	// filter clusters
+	var items []Cluster
+	for _, cluster := range clusters.Items {
+		if opts.LabelSelector.Matches(labels.Set(cluster.GetLabels())) {
+			items = append(items, cluster)
+		}
+	}
+	clusters.Items = items
+
+	// sort clusters
 	sort.Slice(clusters.Items, func(i, j int) bool {
 		if clusters.Items[i].Name == ClusterLocalName {
 			return true
@@ -144,7 +152,13 @@ type clusterSelector struct {
 
 // ApplyToList applies this configuration to the given list options.
 func (m clusterSelector) ApplyToList(opts *client.ListOptions) {
-	opts.LabelSelector = m.Selector
+	opts.LabelSelector = labels.NewSelector()
+	requirements, _ := m.Selector.Requirements()
+	for _, r := range requirements {
+		if !slices.Contains([]string{LabelClusterControlPlane}, r.Key()) {
+			opts.LabelSelector = opts.LabelSelector.Add(r)
+		}
+	}
 	if m.RequireCredentialType {
 		r, _ := labels.NewRequirement(clustergatewaycommon.LabelKeyClusterCredentialType, selection.Exists, nil)
 		opts.LabelSelector = opts.LabelSelector.Add(*r)
