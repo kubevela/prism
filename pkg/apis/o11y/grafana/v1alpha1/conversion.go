@@ -31,6 +31,7 @@ func (in *Grafana) ToSecret() *corev1.Secret {
 	secret.ObjectMeta = in.ObjectMeta
 	secret.SetName(grafanaSecretNamePrefix + in.GetName())
 	secret.SetNamespace(config.ObservabilityNamespace)
+	secret.SetOwnerReferences(nil)
 	annotations := in.GetAnnotations()
 	if annotations == nil {
 		annotations = map[string]string{}
