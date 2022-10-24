@@ -1,6 +1,6 @@
 module github.com/kubevela/prism
 
-go 1.18
+go 1.19
 
 require (
 	github.com/oam-dev/cluster-gateway v1.4.0
