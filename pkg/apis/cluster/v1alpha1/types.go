@@ -69,6 +69,9 @@ func (in *Cluster) New() runtime.Object {
 	return &Cluster{}
 }
 
+// Destroy .
+func (in *Cluster) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *Cluster) NewList() runtime.Object {
 	return &ClusterList{}

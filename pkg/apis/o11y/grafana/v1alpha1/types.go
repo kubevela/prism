@@ -88,6 +88,9 @@ func (in *Grafana) New() runtime.Object {
 	return &Grafana{}
 }
 
+// Destroy .
+func (in *Grafana) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *Grafana) NewList() runtime.Object {
 	return &GrafanaList{}

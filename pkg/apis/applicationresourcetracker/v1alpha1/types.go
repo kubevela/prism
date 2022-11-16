@@ -69,6 +69,9 @@ func (in *ApplicationResourceTracker) New() runtime.Object {
 	return &ApplicationResourceTracker{}
 }
 
+// Destroy .
+func (in *ApplicationResourceTracker) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *ApplicationResourceTracker) NewList() runtime.Object {
 	return &ApplicationResourceTrackerList{}

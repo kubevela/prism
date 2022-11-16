@@ -173,6 +173,17 @@ spec:
             - --secret-namespace={{ .Release.Namespace }}
             - --secret-name={{ .Release.Name }}
             - --target-APIService=v1alpha1.o11y.prism.oam.dev
+        {{ if .Values.dynamicAPI.enabled }}
+        - name: patch-dynamic
+          image: {{ .Values.imageRegistry }}{{ .Values.secureTLS.certPatch.image.repository }}:{{ .Values.secureTLS.certPatch.image.tag }}
+          imagePullPolicy: {{ .Values.secureTLS.certPatch.image.pullPolicy }}
+          command:
+            - /patch
+          args:
+            - --secret-namespace={{ .Release.Namespace }}
+            - --secret-name={{ .Release.Name }}
+            - --target-APIService=v1alpha1.dynamic.prism.oam.dev
+        {{ end }}
       restartPolicy: OnFailure
       serviceAccountName: {{ .Release.Name }}-certpatch
       securityContext:

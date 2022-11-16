@@ -70,6 +70,9 @@ func (in *GrafanaDashboard) New() runtime.Object {
 	return &GrafanaDashboard{}
 }
 
+// Destroy .
+func (in *GrafanaDashboard) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *GrafanaDashboard) NewList() runtime.Object {
 	return &GrafanaDashboardList{}

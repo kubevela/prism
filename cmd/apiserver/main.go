@@ -17,7 +17,7 @@ limitations under the License.
 package main
 
 import (
-	"k8s.io/klog/v2"
+	"k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder"
 
 	apprtv1alpha1 "github.com/kubevela/prism/pkg/apis/applicationresourcetracker/v1alpha1"
@@ -26,6 +26,8 @@ import (
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
 	grafanadashboardv1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadashboard/v1alpha1"
 	grafanadatasourcev1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadatasource/v1alpha1"
+	"github.com/kubevela/prism/pkg/cue"
+	apiserver "github.com/kubevela/prism/pkg/dynamicapiserver"
 	apiserveroptions "github.com/kubevela/prism/pkg/util/apiserver/options"
 	"github.com/kubevela/prism/pkg/util/log"
 	"github.com/kubevela/prism/pkg/util/singleton"
@@ -42,17 +44,15 @@ func main() {
 		WithResource(&grafanav1alpha1.Grafana{}).
 		WithResource(&grafanadatasourcev1alpha1.GrafanaDatasource{}).
 		WithResource(&grafanadashboardv1alpha1.GrafanaDashboard{}).
-		WithConfigFns(apiserveroptions.WrapConfig).
-		WithPostStartHook("init-master-loopback-client", singleton.InitLoopbackClient).
+		WithConfigFns(apiserveroptions.WrapConfig, singleton.InitServerConfig).
+		WithServerFns(cue.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
+		WithPostStartHook("init-client", singleton.InitClient).
+		WithPostStartHook("start-dynamic-server", apiserver.StartDefaultDynamicAPIServer).
 		Build()
-	if err != nil {
-		klog.Fatal(err)
-	}
+	runtime.Must(err)
 	log.AddLogFlags(cmd)
 	apiserveroptions.AddServerRunFlags(cmd.Flags())
 	clusterv1alpha1.AddClusterFlags(cmd.Flags())
 	o11yconfig.AddObservabilityFlags(cmd.Flags())
-	if err = cmd.Execute(); err != nil {
-		klog.Fatal(err)
-	}
+	runtime.Must(cmd.Execute())
 }

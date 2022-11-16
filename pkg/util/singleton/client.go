@@ -17,8 +17,12 @@ limitations under the License.
 package singleton
 
 import (
+	"sync"
+
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apiserver/pkg/server"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,6 +33,8 @@ import (
 var kubeConfig *rest.Config
 var kubeClient client.Client
 var restMapper meta.RESTMapper
+var staticClient kubernetes.Interface
+var dynamicClient dynamic.Interface
 
 // GetKubeConfig get kubernetes config
 func GetKubeConfig() *rest.Config {
@@ -50,8 +56,32 @@ func SetKubeClient(cli client.Client) {
 	kubeClient = cli
 }
 
-// InitLoopbackClient init clients
-func InitLoopbackClient(ctx server.PostStartHookContext) (err error) {
+// GetRESTMapper get rest mapper
+func GetRESTMapper() meta.RESTMapper {
+	return restMapper
+}
+
+// GetDynamicClient get dynamic client
+func GetDynamicClient() dynamic.Interface {
+	return dynamicClient
+}
+
+// GetStaticClient get static client
+func GetStaticClient() kubernetes.Interface {
+	return staticClient
+}
+
+var once = sync.Once{}
+
+// InitClient init clients
+func InitClient(ctx server.PostStartHookContext) (err error) {
+	once.Do(func() {
+		err = initClient(ctx)
+	})
+	return err
+}
+
+func initClient(ctx server.PostStartHookContext) (err error) {
 	if kubeConfig, err = config.GetConfig(); err != nil {
 		return err
 	}
@@ -62,6 +92,12 @@ func InitLoopbackClient(ctx server.PostStartHookContext) (err error) {
 		Scheme: scheme.Scheme,
 		Mapper: restMapper,
 	}); err != nil {
+		return err
+	}
+	if staticClient, err = kubernetes.NewForConfig(kubeConfig); err != nil {
+		return err
+	}
+	if dynamicClient, err = dynamic.NewForConfig(kubeConfig); err != nil {
 		return err
 	}
 	return nil

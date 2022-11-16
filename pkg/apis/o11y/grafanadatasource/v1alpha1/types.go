@@ -70,6 +70,9 @@ func (in *GrafanaDatasource) New() runtime.Object {
 	return &GrafanaDatasource{}
 }
 
+// Destroy .
+func (in *GrafanaDatasource) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *GrafanaDatasource) NewList() runtime.Object {
 	return &GrafanaDatasourceList{}
