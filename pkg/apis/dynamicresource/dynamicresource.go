@@ -230,17 +230,25 @@ func (in *DynamicResource) NamespaceScoped() bool {
 }
 
 func (in *DynamicResource) New() runtime.Object {
-	return &DynamicResource{
+	dr := &DynamicResource{
 		Uns:   &unstructured.Unstructured{},
 		codec: in.codec,
 	}
+	if dr.codec != nil {
+		dr.Uns.SetGroupVersionKind(dr.codec.Source().GroupVersionKind())
+	}
+	return dr
 }
 
 func (in *DynamicResource) NewList() runtime.Object {
-	return &DynamicResourceList{
+	drs := &DynamicResourceList{
 		UnsList: &unstructured.UnstructuredList{},
 		codec:   in.codec,
 	}
+	if drs.codec != nil {
+		drs.UnsList.SetGroupVersionKind(drs.codec.Source().GroupVersionKindList())
+	}
+	return drs
 }
 
 func (in *DynamicResource) Destroy() {}
@@ -269,7 +277,7 @@ func (in *DynamicResource) DeepCopyObject() runtime.Object {
 }
 
 func (in *DynamicResource) resourceInterface(ctx context.Context) dynamic.ResourceInterface {
-	var ri dynamic.ResourceInterface = singleton.GetDynamicClient().Resource(in.codec.Target().GroupVersionResource())
+	var ri dynamic.ResourceInterface = singleton.DynamicClient.Get().Resource(in.codec.Target().GroupVersionResource())
 	if in.codec.Target().Namespaced() {
 		ri = ri.(dynamic.NamespaceableResourceInterface).Namespace(request.NamespaceValue(ctx))
 	}

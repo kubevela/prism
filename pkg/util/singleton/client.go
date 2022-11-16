@@ -17,10 +17,7 @@ limitations under the License.
 package singleton
 
 import (
-	"sync"
-
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apiserver/pkg/server"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -30,75 +27,37 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
-var kubeConfig *rest.Config
-var kubeClient client.Client
-var restMapper meta.RESTMapper
-var staticClient kubernetes.Interface
-var dynamicClient dynamic.Interface
+var UserAgent = NewSingleton[string](nil)
 
-// GetKubeConfig get kubernetes config
-func GetKubeConfig() *rest.Config {
-	return kubeConfig
-}
+var KubeConfig = NewSingleton[*rest.Config](func() *rest.Config {
+	cfg := config.GetConfigOrDie()
+	cfg.UserAgent = UserAgent.Get()
+	return cfg
+})
 
-// SetKubeConfig set kubernetes config
-func SetKubeConfig(cfg *rest.Config) {
-	kubeConfig = cfg
-}
+var RESTMapper = NewSingletonE[meta.RESTMapper](func() (meta.RESTMapper, error) {
+	return apiutil.NewDiscoveryRESTMapper(KubeConfig.Get())
+})
 
-// GetKubeClient get kubernetes client
-func GetKubeClient() client.Client {
-	return kubeClient
-}
-
-// SetKubeClient set kubernetes client
-func SetKubeClient(cli client.Client) {
-	kubeClient = cli
-}
-
-// GetRESTMapper get rest mapper
-func GetRESTMapper() meta.RESTMapper {
-	return restMapper
-}
-
-// GetDynamicClient get dynamic client
-func GetDynamicClient() dynamic.Interface {
-	return dynamicClient
-}
-
-// GetStaticClient get static client
-func GetStaticClient() kubernetes.Interface {
-	return staticClient
-}
-
-var once = sync.Once{}
-
-// InitClient init clients
-func InitClient(ctx server.PostStartHookContext) (err error) {
-	once.Do(func() {
-		err = initClient(ctx)
-	})
-	return err
-}
-
-func initClient(ctx server.PostStartHookContext) (err error) {
-	if kubeConfig, err = config.GetConfig(); err != nil {
-		return err
-	}
-	if restMapper, err = apiutil.NewDiscoveryRESTMapper(kubeConfig); err != nil {
-		return err
-	}
-	if kubeClient, err = client.New(kubeConfig, client.Options{
+var KubeClient = NewSingletonE[client.Client](func() (client.Client, error) {
+	return client.New(KubeConfig.Get(), client.Options{
 		Scheme: scheme.Scheme,
-		Mapper: restMapper,
-	}); err != nil {
-		return err
-	}
-	if staticClient, err = kubernetes.NewForConfig(kubeConfig); err != nil {
-		return err
-	}
-	if dynamicClient, err = dynamic.NewForConfig(kubeConfig); err != nil {
-		return err
-	}
-	return nil
+		Mapper: RESTMapper.Get(),
+	})
+})
+
+var StaticClient = NewSingletonE[kubernetes.Interface](func() (kubernetes.Interface, error) {
+	return kubernetes.NewForConfig(KubeConfig.Get())
+})
+
+var DynamicClient = NewSingletonE[dynamic.Interface](func() (dynamic.Interface, error) {
+	return dynamic.NewForConfig(KubeConfig.Get())
+})
+
+// ReloadClients should be called when KubeConfig is called to update related clients
+func ReloadClients() {
+	RESTMapper.Reload()
+	KubeClient.Reload()
+	StaticClient.Reload()
+	DynamicClient.Reload()
 }

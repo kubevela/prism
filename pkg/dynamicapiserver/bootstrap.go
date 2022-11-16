@@ -24,12 +24,9 @@ import (
 
 // StartDefaultDynamicAPIServer run default dynamic apiserver in backend
 func StartDefaultDynamicAPIServer(ctx server.PostStartHookContext) error {
-	if err := singleton.InitClient(ctx); err != nil {
-		return err
-	}
 	DefaultDynamicAPIServer = NewDynamicAPIServer(
-		singleton.GetGenericAPIServer(),
-		singleton.GetServerConfig())
+		singleton.GenericAPIServer.Get(),
+		singleton.APIServerConfig.Get())
 	go StartDynamicResourceFactoryWithConfigMapInformer(ctx.StopCh)
 	//go StartDynamicResourceFactoryWithConfigMapInformer(ctx.StopCh)
 	return nil

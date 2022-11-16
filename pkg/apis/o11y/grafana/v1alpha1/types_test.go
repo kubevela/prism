@@ -89,7 +89,7 @@ var _ = Describe("Test Grafana API", func() {
 		}
 		for _, secret := range []*corev1.Secret{secret1, secret2, secret3} {
 			secret.SetNamespace(config.ObservabilityNamespace)
-			Ω(singleton.GetKubeClient().Create(context.Background(), secret)).To(Succeed())
+			Ω(singleton.KubeClient.Get().Create(context.Background(), secret)).To(Succeed())
 		}
 
 		By("Test Get Grafana")

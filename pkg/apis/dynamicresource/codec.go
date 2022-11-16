@@ -94,7 +94,7 @@ func NewDefaultTyper(apiVersion string, kind string) (Typer, error) {
 	}
 	resource := strings.ToLower(kind) + "s"
 	namespaced := true
-	mappings, err := singleton.GetRESTMapper().RESTMappings(gv.WithKind(kind).GroupKind(), gv.Version)
+	mappings, err := singleton.RESTMapper.Get().RESTMappings(gv.WithKind(kind).GroupKind(), gv.Version)
 	if err == nil && len(mappings) > 0 {
 		resource = mappings[0].Resource.Resource
 		namespaced = mappings[0].Scope.Name() == meta.RESTScopeNameNamespace

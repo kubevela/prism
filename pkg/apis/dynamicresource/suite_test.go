@@ -14,25 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package singleton
+package dynamicresource_test
 
 import (
-	"k8s.io/apiserver/pkg/server"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+
+	_ "github.com/kubevela/prism/test/bootstrap"
 )
 
-var GenericAPIServer = NewSingleton[*builder.GenericAPIServer](nil)
-
-func InitGenericAPIServer(server *builder.GenericAPIServer) *builder.GenericAPIServer {
-	GenericAPIServer.Set(server)
-	return server
-}
-
-var APIServerConfig = NewSingleton[*server.Config](nil)
-
-func InitServerConfig(config *server.RecommendedConfig) *server.RecommendedConfig {
-	serverConfig := &server.Config{}
-	*serverConfig = config.Config
-	APIServerConfig.Set(serverConfig)
-	return config
+func TestDynamicResource(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Test Dynamic Resource")
 }

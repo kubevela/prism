@@ -37,7 +37,7 @@ const (
 
 func StartDynamicResourceFactoryWithConfigMapInformer(stopCh <-chan struct{}) {
 	factory := informers.NewSharedInformerFactoryWithOptions(
-		singleton.GetStaticClient(), 0,
+		singleton.StaticClient.Get(), 0,
 		informers.WithNamespace(defaultNamespace))
 	informer := factory.Core().V1().ConfigMaps().Informer()
 	defer runtime.HandleCrash()
@@ -64,7 +64,7 @@ func StartDynamicResourceFactoryWithConfigMapInformer(stopCh <-chan struct{}) {
 	informer.Run(stopCh)
 }
 
-func handleResource(obj interface{}, handler func(ResourceProvider) error) error {
+func handleResource(obj interface{}, action string, handler func(ResourceProvider) error) error {
 	var r ResourceProvider
 	var err error
 	switch o := obj.(type) {
@@ -79,16 +79,16 @@ func handleResource(obj interface{}, handler func(ResourceProvider) error) error
 	if r == nil {
 		return nil
 	}
-	klog.Infof("Handle Resource %s.%s", r.GetGroupVersionResource().Resource, r.GetGroupVersion())
+	klog.Infof("Handle Resource %s.%s (%s)", r.GetGroupVersionResource().Resource, r.GetGroupVersion(), action)
 	return handler(r)
 }
 
 func addResource(obj interface{}) error {
-	return handleResource(obj, DefaultDynamicAPIServer.AddResource)
+	return handleResource(obj, "Add", DefaultDynamicAPIServer.AddResource)
 }
 
 func removeResource(obj interface{}) error {
-	return handleResource(obj, DefaultDynamicAPIServer.RemoveResource)
+	return handleResource(obj, "Remove", DefaultDynamicAPIServer.RemoveResource)
 }
 
 func newDynamicResourceFromConfigMap(cm *corev1.ConfigMap) (obj ResourceProvider, err error) {

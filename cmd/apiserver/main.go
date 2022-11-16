@@ -46,7 +46,6 @@ func main() {
 		WithResource(&grafanadashboardv1alpha1.GrafanaDashboard{}).
 		WithConfigFns(apiserveroptions.WrapConfig, singleton.InitServerConfig).
 		WithServerFns(cue.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
-		WithPostStartHook("init-client", singleton.InitClient).
 		WithPostStartHook("start-dynamic-server", apiserver.StartDefaultDynamicAPIServer).
 		Build()
 	runtime.Must(err)

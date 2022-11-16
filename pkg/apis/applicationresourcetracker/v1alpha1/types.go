@@ -97,7 +97,7 @@ func (in *ApplicationResourceTracker) Get(ctx context.Context, name string, opti
 	rt := &unstructured.Unstructured{}
 	rt.SetGroupVersionKind(ResourceTrackerGroupVersionKind)
 	ns := request.NamespaceValue(ctx)
-	if err := singleton.GetKubeClient().Get(ctx, types.NamespacedName{Name: name + "-" + ns}, rt); err != nil {
+	if err := singleton.KubeClient.Get().Get(ctx, types.NamespacedName{Name: name + "-" + ns}, rt); err != nil {
 		return nil, err
 	}
 	return NewApplicationResourceTrackerFromResourceTracker(rt)
@@ -112,7 +112,7 @@ func (in *ApplicationResourceTracker) List(ctx context.Context, options *metaint
 	if options != nil {
 		sel.selector = options.LabelSelector
 	}
-	if err := singleton.GetKubeClient().List(ctx, rts, sel); err != nil {
+	if err := singleton.KubeClient.Get().List(ctx, rts, sel); err != nil {
 		return nil, err
 	}
 	appRts := &ApplicationResourceTrackerList{}

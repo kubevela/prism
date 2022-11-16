@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package singleton
+package singleton_test
 
 import (
-	"k8s.io/apiserver/pkg/server"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
-var GenericAPIServer = NewSingleton[*builder.GenericAPIServer](nil)
-
-func InitGenericAPIServer(server *builder.GenericAPIServer) *builder.GenericAPIServer {
-	GenericAPIServer.Set(server)
-	return server
-}
-
-var APIServerConfig = NewSingleton[*server.Config](nil)
-
-func InitServerConfig(config *server.RecommendedConfig) *server.RecommendedConfig {
-	serverConfig := &server.Config{}
-	*serverConfig = config.Config
-	APIServerConfig.Set(serverConfig)
-	return config
+func TestSingleton(t *testing.T) {
+	x := 1
+	sgt := singleton.NewSingletonE(func() (int, error) {
+		return x + 1, nil
+	})
+	require.Equal(t, 2, sgt.Get())
+	sgt.Set(2)
+	require.Equal(t, 2, sgt.Get())
+	x = 3
+	sgt.Reload()
+	require.Equal(t, 4, sgt.Get())
 }

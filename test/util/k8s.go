@@ -30,17 +30,17 @@ import (
 func CreateNamespace(name string) error {
 	ns := &corev1.Namespace{}
 	ns.SetName(name)
-	return singleton.GetKubeClient().Create(context.Background(), ns)
+	return singleton.KubeClient.Get().Create(context.Background(), ns)
 }
 
 // DeleteNamespace .
 func DeleteNamespace(name string) error {
 	ns := &corev1.Namespace{}
-	if err := singleton.GetKubeClient().Get(context.Background(), types.NamespacedName{Name: name}, ns); err != nil {
+	if err := singleton.KubeClient.Get().Get(context.Background(), types.NamespacedName{Name: name}, ns); err != nil {
 		if errors.IsNotFound(err) {
 			return nil
 		}
 		return err
 	}
-	return singleton.GetKubeClient().Delete(context.Background(), ns)
+	return singleton.KubeClient.Get().Delete(context.Background(), ns)
 }
