@@ -55,7 +55,7 @@ var _ = Describe("Test ApplicationResourceTracker API", func() {
 				labelAppNamespace: ns,
 				"key":             val,
 			})
-			Ω(singleton.GetKubeClient().Create(ctx, rt)).To(Succeed())
+			Ω(singleton.KubeClient.Get().Create(ctx, rt)).To(Succeed())
 			return rt
 		}
 		createRt("app-1", "example", "x")

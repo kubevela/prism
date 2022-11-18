@@ -70,6 +70,9 @@ func (in *GrafanaDashboard) New() runtime.Object {
 	return &GrafanaDashboard{}
 }
 
+// Destroy .
+func (in *GrafanaDashboard) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *GrafanaDashboard) NewList() runtime.Object {
 	return &GrafanaDashboardList{}
@@ -92,15 +95,15 @@ func (in *GrafanaDashboard) ShortNames() []string {
 
 // Get finds a resource in the storage by name and returns it.
 func (in *GrafanaDashboard) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
-	return NewGrafanaDashboardClient(singleton.GetKubeClient()).Get(ctx, name)
+	return NewGrafanaDashboardClient(singleton.KubeClient.Get()).Get(ctx, name)
 }
 
 func (in *GrafanaDashboard) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
-	return obj, NewGrafanaDashboardClient(singleton.GetKubeClient()).Create(ctx, obj.(*GrafanaDashboard))
+	return obj, NewGrafanaDashboardClient(singleton.KubeClient.Get()).Create(ctx, obj.(*GrafanaDashboard))
 }
 
 func (in *GrafanaDashboard) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (obj runtime.Object, _ bool, err error) {
-	cli := NewGrafanaDashboardClient(singleton.GetKubeClient())
+	cli := NewGrafanaDashboardClient(singleton.KubeClient.Get())
 	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
@@ -111,7 +114,7 @@ func (in *GrafanaDashboard) Update(ctx context.Context, name string, objInfo res
 }
 
 func (in *GrafanaDashboard) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (obj runtime.Object, _ bool, err error) {
-	cli := NewGrafanaDashboardClient(singleton.GetKubeClient())
+	cli := NewGrafanaDashboardClient(singleton.KubeClient.Get())
 	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
@@ -120,7 +123,7 @@ func (in *GrafanaDashboard) Delete(ctx context.Context, name string, deleteValid
 
 func (in *GrafanaDashboard) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
 	if name := apiserver.GetMetadataNameInFieldSelectorFromInternalVersionListOptions(options); name != nil {
-		return NewGrafanaDashboardClient(singleton.GetKubeClient()).Get(ctx, *name)
+		return NewGrafanaDashboardClient(singleton.KubeClient.Get()).Get(ctx, *name)
 	}
-	return NewGrafanaDashboardClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
+	return NewGrafanaDashboardClient(singleton.KubeClient.Get()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
 }

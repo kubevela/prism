@@ -42,3 +42,6 @@ secureTLS:
       repository: oamdev/cluster-gateway
       tag: v1.4.0
       pullPolicy: IfNotPresent
+
+dynamicAPI:
+  enabled: true

@@ -37,12 +37,12 @@ import (
 
 // Get finds a resource in the storage by name and returns it.
 func (in *Cluster) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
-	return NewClusterClient(singleton.GetKubeClient()).Get(ctx, name)
+	return NewClusterClient(singleton.KubeClient.Get()).Get(ctx, name)
 }
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (in *Cluster) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	return NewClusterClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
+	return NewClusterClient(singleton.KubeClient.Get()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
 }
 
 func extractLabels(labels map[string]string) map[string]string {

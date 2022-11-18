@@ -25,7 +25,6 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/utils/pointer"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -51,10 +50,8 @@ var _ = BeforeSuite(func() {
 
 	cfg, err := testEnv.Start()
 	Ω(err).To(Succeed())
-	singleton.SetKubeConfig(cfg)
-	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	Ω(err).To(Succeed())
-	singleton.SetKubeClient(k8sClient)
+	singleton.KubeConfig.Set(cfg)
+	singleton.ReloadClients()
 })
 
 var _ = AfterSuite(func() {

@@ -58,10 +58,10 @@ var _ = Describe("Test Cluster API", func() {
 		ctx := context.Background()
 
 		By("Create storage namespace")
-		Ω(singleton.GetKubeClient().Create(ctx, &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: StorageNamespace}})).To(Succeed())
+		Ω(singleton.KubeClient.Get().Create(ctx, &v1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: StorageNamespace}})).To(Succeed())
 
 		By("Create cluster secret")
-		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
+		Ω(singleton.KubeClient.Get().Create(ctx, &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-cluster",
 				Namespace: StorageNamespace,
@@ -73,14 +73,14 @@ var _ = Describe("Test Cluster API", func() {
 				Annotations: map[string]string{AnnotationClusterAlias: "test-cluster-alias"},
 			},
 		})).To(Succeed())
-		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
+		Ω(singleton.KubeClient.Get().Create(ctx, &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "cluster-invalid",
 				Namespace: StorageNamespace,
 			},
 			Data: map[string][]byte{"endpoint": []byte("127.0.0.1:6443")},
 		})).To(Succeed())
-		Ω(singleton.GetKubeClient().Create(ctx, &v1.Secret{
+		Ω(singleton.KubeClient.Get().Create(ctx, &v1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "ocm-cluster",
 				Namespace: StorageNamespace,
@@ -103,13 +103,13 @@ var _ = Describe("Test Cluster API", func() {
 		Ω(err).To(Satisfy(IsInvalidClusterSecretError))
 
 		By("Create OCM ManagedCluster")
-		Ω(singleton.GetKubeClient().Create(ctx, &ocmclusterv1.ManagedCluster{
+		Ω(singleton.KubeClient.Get().Create(ctx, &ocmclusterv1.ManagedCluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "ocm-bad-cluster",
 				Namespace: StorageNamespace,
 			},
 		})).To(Succeed())
-		Ω(singleton.GetKubeClient().Create(ctx, &ocmclusterv1.ManagedCluster{
+		Ω(singleton.KubeClient.Get().Create(ctx, &ocmclusterv1.ManagedCluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "ocm-cluster",
 				Namespace: StorageNamespace,
@@ -119,7 +119,7 @@ var _ = Describe("Test Cluster API", func() {
 				ManagedClusterClientConfigs: []ocmclusterv1.ClientConfig{{URL: "test-url"}},
 			},
 		})).To(Succeed())
-		Ω(singleton.GetKubeClient().Create(ctx, &ocmclusterv1.ManagedCluster{
+		Ω(singleton.KubeClient.Get().Create(ctx, &ocmclusterv1.ManagedCluster{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-cluster",
 				Namespace: StorageNamespace,

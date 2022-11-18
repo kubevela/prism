@@ -88,6 +88,9 @@ func (in *Grafana) New() runtime.Object {
 	return &Grafana{}
 }
 
+// Destroy .
+func (in *Grafana) Destroy() {}
+
 // NewList return a new list instance of the resource
 func (in *Grafana) NewList() runtime.Object {
 	return &GrafanaList{}
@@ -118,22 +121,22 @@ const (
 
 // Get finds a resource in the storage by name and returns it.
 func (in *Grafana) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
-	return NewGrafanaClient(singleton.GetKubeClient()).Get(ctx, name)
+	return NewGrafanaClient(singleton.KubeClient.Get()).Get(ctx, name)
 }
 
 // List selects resources in the storage which match to the selector. 'options' can be nil.
 func (in *Grafana) List(ctx context.Context, options *metainternalversion.ListOptions) (runtime.Object, error) {
-	return NewGrafanaClient(singleton.GetKubeClient()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
+	return NewGrafanaClient(singleton.KubeClient.Get()).List(ctx, apiserver.NewMatchingLabelSelectorFromInternalVersionListOptions(options))
 }
 
 // Create creates a new version of a resource.
 func (in *Grafana) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
-	return obj, NewGrafanaClient(singleton.GetKubeClient()).Create(ctx, obj.(*Grafana))
+	return obj, NewGrafanaClient(singleton.KubeClient.Get()).Create(ctx, obj.(*Grafana))
 }
 
 // Update finds a resource in the storage and updates it.
 func (in *Grafana) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (obj runtime.Object, _ bool, err error) {
-	cli := NewGrafanaClient(singleton.GetKubeClient())
+	cli := NewGrafanaClient(singleton.KubeClient.Get())
 	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
@@ -145,7 +148,7 @@ func (in *Grafana) Update(ctx context.Context, name string, objInfo rest.Updated
 
 // Delete finds a resource in the storage and deletes it.
 func (in *Grafana) Delete(ctx context.Context, name string, deleteValidation rest.ValidateObjectFunc, options *metav1.DeleteOptions) (obj runtime.Object, _ bool, err error) {
-	cli := NewGrafanaClient(singleton.GetKubeClient())
+	cli := NewGrafanaClient(singleton.KubeClient.Get())
 	if obj, err = cli.Get(ctx, name); err != nil {
 		return nil, false, err
 	}
