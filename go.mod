@@ -5,7 +5,7 @@ go 1.19
 require (
 	cuelang.org/go v0.5.0-alpha.1
 	github.com/emicklei/go-restful/v3 v3.8.0
-	github.com/oam-dev/cluster-gateway v1.4.0
+	github.com/oam-dev/cluster-gateway v1.6.1-0.20221118035852-bdcfca34abdb
 	github.com/onsi/ginkgo/v2 v2.1.6
 	github.com/onsi/gomega v1.20.1
 	github.com/spf13/cobra v1.6.0
@@ -67,7 +67,7 @@ require (
 	github.com/mpvl/unique v0.0.0-20150818121801-cbe035fff7de // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
-	github.com/openshift/library-go v0.0.0-20220112153822-ac82336bd076 // indirect
+	github.com/openshift/library-go v0.0.0-20221111030555-73ed40c0a938 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
@@ -109,7 +109,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.24.0 // indirect
+	k8s.io/apiextensions-apiserver v0.25.0 // indirect
 	k8s.io/component-base v0.25.3 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
@@ -121,7 +121,5 @@ require (
 )
 
 replace sigs.k8s.io/apiserver-network-proxy/konnectivity-client => sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.24
-
-replace github.com/oam-dev/cluster-gateway => github.com/Somefive/cluster-gateway v1.3.3-0.20221115131555-ed545dc6ed50
 
 replace cloud.google.com/go => cloud.google.com/go v0.100.2
