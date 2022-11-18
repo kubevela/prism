@@ -110,7 +110,7 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 	}
 
 	managedClusters := &ocmclusterv1.ManagedClusterList{}
-	err = c.Client.List(ctx, managedClusters, clusterSelector{Selector: opts.LabelSelector, RequireCredentialType: false})
+	err = c.Client.List(ctx, managedClusters, clusterSelector{Selector: opts.LabelSelector, RequireCredentialType: false, IgnoreNamespace: true})
 	if err != nil && !meta.IsNoMatchError(err) && !runtime.IsNotRegisteredError(err) {
 		return nil, err
 	}
@@ -148,6 +148,7 @@ func (c *clusterClient) List(ctx context.Context, options ...client.ListOption) 
 type clusterSelector struct {
 	Selector              labels.Selector
 	RequireCredentialType bool
+	IgnoreNamespace       bool
 }
 
 // ApplyToList applies this configuration to the given list options.
@@ -165,5 +166,7 @@ func (m clusterSelector) ApplyToList(opts *client.ListOptions) {
 		r, _ := labels.NewRequirement(clustergatewaycommon.LabelKeyClusterCredentialType, selection.Exists, nil)
 		opts.LabelSelector = opts.LabelSelector.Add(*r)
 	}
-	opts.Namespace = StorageNamespace
+	if !m.IgnoreNamespace {
+		opts.Namespace = StorageNamespace
+	}
 }
