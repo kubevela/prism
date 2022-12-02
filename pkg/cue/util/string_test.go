@@ -14,21 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cue
+package util_test
 
 import (
-	"cuelang.org/go/cue"
+	"testing"
+
 	"cuelang.org/go/cue/cuecontext"
+	"github.com/stretchr/testify/require"
+
+	"github.com/kubevela/prism/pkg/cue/util"
 )
 
-func CompileBytes(bs []byte, path ...string) ([]byte, error) {
+func TestToString(t *testing.T) {
 	ctx := cuecontext.New()
-	val := ctx.CompileBytes(bs)
-	if err := val.Err(); err != nil {
-		return nil, err
-	}
-	for _, p := range path {
-		val = val.LookupPath(cue.ParsePath(p))
-	}
-	return val.MarshalJSON()
+	v := ctx.CompileString(`// +usage=x
+x: y
+y: 5
+_z: 1`)
+	s, err := util.ToString(v)
+	require.NoError(t, err)
+	x := `{
+	// +usage=x
+	x:  5
+	y:  5
+	_z: 1
+}`
+	require.Equal(t, x, s)
 }

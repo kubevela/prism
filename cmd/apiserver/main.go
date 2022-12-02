@@ -26,7 +26,7 @@ import (
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
 	grafanadashboardv1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadashboard/v1alpha1"
 	grafanadatasourcev1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadatasource/v1alpha1"
-	"github.com/kubevela/prism/pkg/cue"
+	cueserver "github.com/kubevela/prism/pkg/cue/server"
 	apiserver "github.com/kubevela/prism/pkg/dynamicapiserver"
 	apiserveroptions "github.com/kubevela/prism/pkg/util/apiserver/options"
 	"github.com/kubevela/prism/pkg/util/log"
@@ -45,7 +45,7 @@ func main() {
 		WithResource(&grafanadatasourcev1alpha1.GrafanaDatasource{}).
 		WithResource(&grafanadashboardv1alpha1.GrafanaDashboard{}).
 		WithConfigFns(apiserveroptions.WrapConfig, singleton.InitServerConfig).
-		WithServerFns(cue.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
+		WithServerFns(cueserver.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
 		WithPostStartHook("start-dynamic-server", apiserver.StartDefaultDynamicAPIServer).
 		Build()
 	runtime.Must(err)

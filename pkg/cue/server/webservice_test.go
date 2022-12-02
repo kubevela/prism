@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cue_test
+package server_test
 
 import (
 	"bytes"
@@ -26,14 +26,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apiserver/pkg/server"
 
-	"github.com/kubevela/prism/pkg/cue"
+	cueserver "github.com/kubevela/prism/pkg/cue/server"
 )
 
 func TestRegisterGenericAPIServer(t *testing.T) {
 	s := &server.GenericAPIServer{Handler: &server.APIServerHandler{
 		GoRestfulContainer: restful.NewContainer(),
 	}}
-	cue.RegisterGenericAPIServer(s)
+	cueserver.RegisterGenericAPIServer(s)
 }
 
 type FakeResponseWriter struct {
@@ -106,7 +106,7 @@ func TestHandleEvalRequest(t *testing.T) {
 			request := restful.NewRequest(raw)
 			writer := &FakeResponseWriter{Bad: tt.BadWriter}
 			response := restful.NewResponse(writer)
-			cue.HandleEvalRequest(request, response)
+			cueserver.HandleEvalRequest(request, response)
 			require.Equal(t, tt.StatusCode, writer.StatusCode)
 			if tt.StatusCode == http.StatusOK {
 				require.Equal(t, tt.Output, writer.Bytes())

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cue
+package server
 
 import (
 	"io"
@@ -25,9 +25,10 @@ import (
 )
 
 const (
-	webserviceRootPath         = "/cue"
-	webserviceEvalPath         = "/eval"
-	webserviceParameterKeyPath = "path"
+	webserviceRootPath            = "/cue"
+	webserviceEvalPath            = "/eval"
+	webserviceParameterKeyPath    = "path"
+	webserviceParameterKeyCompile = "compile"
 )
 
 func RegisterGenericAPIServer(server *server.GenericAPIServer) *server.GenericAPIServer {
@@ -48,7 +49,11 @@ func HandleEvalRequest(request *restful.Request, response *restful.Response) {
 	if p := request.QueryParameter(webserviceParameterKeyPath); len(p) > 0 {
 		path = append(path, p)
 	}
-	res, err := CompileBytes(bs, path...)
+	f := Render
+	if p := request.QueryParameter(webserviceParameterKeyCompile); len(p) > 0 {
+		f = Compile
+	}
+	res, err := f(bs, path...)
 	if err != nil {
 		_ = response.WriteError(http.StatusBadRequest, err)
 		return

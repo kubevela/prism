@@ -14,26 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cue_test
+package util
 
-import (
-	"testing"
+import "cuelang.org/go/cue"
 
-	"github.com/stretchr/testify/require"
-
-	"github.com/kubevela/prism/pkg/cue"
-)
-
-func TestCompileBytes(t *testing.T) {
-	bad := []byte(`something-bad: bad-value`)
-	_, err := cue.CompileBytes(bad)
-	require.Error(t, err)
-	good := []byte(`
-	x: *3 | int
-	y: pow: x * x
-	z: yVal: pow: y.pow 
-	`)
-	bs, err := cue.CompileBytes(good, "z", "yVal")
-	require.NoError(t, err)
-	require.Equal(t, []byte(`{"pow":9}`), bs)
+// Iterate over all fields of the cue.Value with fn, if fn returns true,
+// iteration stops
+func Iterate(value cue.Value, fn func(v cue.Value) (stop bool)) (stop bool) {
+	var it *cue.Iterator
+	switch value.Kind() {
+	case cue.ListKind:
+		_it, _ := value.List()
+		it = &_it
+	default:
+		it, _ = value.Fields(cue.Optional(true), cue.Hidden(true), cue.Definitions(true))
+	}
+	for it != nil && it.Next() {
+		if Iterate(it.Value(), fn) {
+			return true
+		}
+	}
+	return fn(value)
 }
