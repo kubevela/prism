@@ -20,17 +20,18 @@ import (
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder"
 
+	cueserver "github.com/kubevela/pkg/cue/server"
+	apiserveroptions "github.com/kubevela/pkg/util/apiserver/options"
+	"github.com/kubevela/pkg/util/log"
+	"github.com/kubevela/pkg/util/singleton"
+
 	apprtv1alpha1 "github.com/kubevela/prism/pkg/apis/applicationresourcetracker/v1alpha1"
 	clusterv1alpha1 "github.com/kubevela/prism/pkg/apis/cluster/v1alpha1"
 	o11yconfig "github.com/kubevela/prism/pkg/apis/o11y/config"
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
 	grafanadashboardv1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadashboard/v1alpha1"
 	grafanadatasourcev1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafanadatasource/v1alpha1"
-	"github.com/kubevela/prism/pkg/cue"
 	apiserver "github.com/kubevela/prism/pkg/dynamicapiserver"
-	apiserveroptions "github.com/kubevela/prism/pkg/util/apiserver/options"
-	"github.com/kubevela/prism/pkg/util/log"
-	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
 func main() {
@@ -45,7 +46,7 @@ func main() {
 		WithResource(&grafanadatasourcev1alpha1.GrafanaDatasource{}).
 		WithResource(&grafanadashboardv1alpha1.GrafanaDashboard{}).
 		WithConfigFns(apiserveroptions.WrapConfig, singleton.InitServerConfig).
-		WithServerFns(cue.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
+		WithServerFns(cueserver.RegisterGenericAPIServer, singleton.InitGenericAPIServer).
 		WithPostStartHook("start-dynamic-server", apiserver.StartDefaultDynamicAPIServer).
 		Build()
 	runtime.Must(err)

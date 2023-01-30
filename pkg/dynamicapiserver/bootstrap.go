@@ -19,7 +19,7 @@ package apiserver
 import (
 	"k8s.io/apiserver/pkg/server"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 // StartDefaultDynamicAPIServer run default dynamic apiserver in backend

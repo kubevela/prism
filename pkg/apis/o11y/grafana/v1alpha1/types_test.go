@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"context"
 
+	"github.com/kubevela/pkg/util/k8s"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -30,19 +31,19 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/utils/pointer"
 
+	"github.com/kubevela/pkg/util/singleton"
+
 	"github.com/kubevela/prism/pkg/apis/o11y/config"
-	"github.com/kubevela/prism/pkg/util/singleton"
-	testutil "github.com/kubevela/prism/test/util"
 )
 
 var _ = Describe("Test Grafana API", func() {
 
 	BeforeEach(func() {
-		Ω(testutil.CreateNamespace(config.ObservabilityNamespace)).To(Succeed())
+		Ω(k8s.EnsureNamespace(context.Background(), singleton.KubeClient.Get(), config.ObservabilityNamespace)).To(Succeed())
 	})
 
 	AfterEach(func() {
-		Ω(testutil.DeleteNamespace(config.ObservabilityNamespace)).To(Succeed())
+		Ω(k8s.ClearNamespace(context.Background(), singleton.KubeClient.Get(), config.ObservabilityNamespace)).To(Succeed())
 	})
 
 	It("Test Grafana API", func() {

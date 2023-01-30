@@ -26,6 +26,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kubevela/pkg/util/k8s"
+	"github.com/kubevela/pkg/util/singleton"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,7 +39,6 @@ import (
 	grafanav1alpha1 "github.com/kubevela/prism/pkg/apis/o11y/grafana/v1alpha1"
 	"github.com/kubevela/prism/pkg/util/subresource"
 	_ "github.com/kubevela/prism/test/bootstrap"
-	testutil "github.com/kubevela/prism/test/util"
 )
 
 func TestGrafanaDashboard(t *testing.T) {
@@ -51,7 +52,7 @@ var _ = Describe("Test GrafanaDashboard API", func() {
 	var data map[string][]byte
 
 	BeforeEach(func() {
-		Ω(testutil.CreateNamespace(config.ObservabilityNamespace)).To(Succeed())
+		Ω(k8s.EnsureNamespace(context.Background(), singleton.KubeClient.Get(), config.ObservabilityNamespace)).To(Succeed())
 		data = map[string][]byte{}
 		mockServer = httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			p := request.Method + " " + request.URL.Path
@@ -96,7 +97,7 @@ var _ = Describe("Test GrafanaDashboard API", func() {
 	})
 
 	AfterEach(func() {
-		Ω(testutil.DeleteNamespace(config.ObservabilityNamespace)).To(Succeed())
+		Ω(k8s.ClearNamespace(context.Background(), singleton.KubeClient.Get(), config.ObservabilityNamespace)).To(Succeed())
 		mockServer.Close()
 	})
 

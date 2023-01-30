@@ -31,8 +31,8 @@ import (
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/prism/pkg/util/apiserver"
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/apiserver"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 // Get finds a resource in the storage by name and returns it.

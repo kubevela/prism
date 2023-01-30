@@ -30,7 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 var _ = Describe("Test Cluster API", func() {

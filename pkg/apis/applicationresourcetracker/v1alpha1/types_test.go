@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apiserver/pkg/endpoints/request"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 var _ = Describe("Test ApplicationResourceTracker API", func() {

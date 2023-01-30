@@ -26,8 +26,8 @@ import (
 	"k8s.io/apiserver/pkg/registry/rest"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 
-	"github.com/kubevela/prism/pkg/util/apiserver"
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/apiserver"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 // GrafanaDashboard is a reflection api for Grafana Datasource
