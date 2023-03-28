@@ -167,7 +167,7 @@ func (in *DynamicAPIServer) AddGroupVersionResourceHandler(gvr schema.GroupVersi
 	apiGroupVersion.Storage[gvr.Resource] = storage
 	in.apiGroupVersions[gv] = apiGroupVersion
 	in.removeGroupVersionHandler(gv)
-	_, err := apiGroupVersion.InstallREST(in.server.Handler.GoRestfulContainer)
+	_, _, err := apiGroupVersion.InstallREST(in.server.Handler.GoRestfulContainer)
 	return err
 }
 
@@ -185,7 +185,7 @@ func (in *DynamicAPIServer) RemoveGroupVersionResourceHandler(gvr schema.GroupVe
 		delete(in.apiGroupVersions, gv)
 		return nil
 	}
-	_, err := apiGroupVersion.InstallREST(in.server.Handler.GoRestfulContainer)
+	_, _, err := apiGroupVersion.InstallREST(in.server.Handler.GoRestfulContainer)
 	return err
 }
 
