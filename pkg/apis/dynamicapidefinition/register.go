@@ -22,7 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	kruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 )
 
 const (
@@ -36,19 +35,11 @@ func init() {
 	kruntime.Must(AddToScheme(scheme.Scheme))
 }
 
-// AddToScheme add virtual cluster scheme
+// AddToScheme add DynamicAPIDefinition scheme
 var AddToScheme = func(scheme *runtime.Scheme) error {
 	metav1.AddToGroupVersion(scheme, GroupVersion)
-	metav1.AddToGroupVersion(scheme, ocmclusterv1.GroupVersion)
 	// +kubebuilder:scaffold:install
-	scheme.AddKnownTypes(GroupVersion,
-		&Cluster{},
-		&ClusterList{},
-	)
-	scheme.AddKnownTypes(ocmclusterv1.GroupVersion,
-		&ocmclusterv1.ManagedCluster{},
-		&ocmclusterv1.ManagedClusterList{},
-	)
+	scheme.AddKnownTypes(GroupVersion)
 	return nil
 }
 
@@ -56,12 +47,12 @@ var AddToScheme = func(scheme *runtime.Scheme) error {
 var GroupVersion = schema.GroupVersion{Group: Group, Version: Version}
 
 var (
-	// ClusterResource resource name for Cluster
-	ClusterResource = "clusters"
-	// ClusterKind kind name for Cluster
-	ClusterKind = "Cluster"
-	// ClusterGroupResource GroupResource for Cluster
-	ClusterGroupResource = schema.GroupResource{Group: Group, Resource: ClusterResource}
-	// ClusterGroupVersionKind GroupVersionKind for Cluster
-	ClusterGroupVersionKind = GroupVersion.WithKind(ClusterKind)
+	// DynamicAPIDefinitionResource resource name for DynamicAPIDefinition
+	DynamicAPIDefinitionResource = "dynamicapidefinition"
+	// DynamicAPIDefinitionKind kind name for DynamicAPIDefinition
+	DynamicAPIDefinitionKind = "DynamicAPIDefinition"
+	// DynamicAPIDefinitionGroupResource GroupResource for DynamicAPIDefinition
+	DynamicAPIDefinitionGroupResource = schema.GroupResource{Group: Group, Resource: DynamicAPIDefinitionResource}
+	// DynamicAPIDefinitionGroupVersionKind GroupVersionKind for DynamicAPIDefinition
+	DynamicAPIDefinitionGroupVersionKind = GroupVersion.WithKind(DynamicAPIDefinitionKind)
 )
