@@ -23,7 +23,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/kubevela/prism/pkg/util/apiserver"
+	"github.com/kubevela/pkg/util/apiserver"
+
 	"github.com/kubevela/prism/pkg/util/subresource"
 )
 

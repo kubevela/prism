@@ -33,7 +33,7 @@ import (
 	ocmclusterv1 "open-cluster-management.io/api/cluster/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/prism/pkg/util/apiserver"
+	"github.com/kubevela/pkg/util/apiserver"
 )
 
 // ClusterClient client for reading cluster information

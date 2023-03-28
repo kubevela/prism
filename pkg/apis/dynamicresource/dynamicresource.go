@@ -32,7 +32,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 type DynamicResource struct {
@@ -308,11 +308,7 @@ func (in *DynamicResource) Create(ctx context.Context, obj runtime.Object, creat
 }
 
 func (in *DynamicResource) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
-	obj, err := in.resourceInterface(ctx).Get(ctx, name, metav1.GetOptions{})
-	if err != nil {
-		return nil, false, err
-	}
-	decoded, err := in.codec.Decode(obj)
+	decoded, err := in.Get(ctx, name, &metav1.GetOptions{})
 	if err != nil {
 		return nil, false, err
 	}

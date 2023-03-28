@@ -25,8 +25,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 
+	"github.com/kubevela/pkg/util/singleton"
+
 	"github.com/kubevela/prism/pkg/apis/dynamicresource"
-	"github.com/kubevela/prism/pkg/util/singleton"
 )
 
 const (

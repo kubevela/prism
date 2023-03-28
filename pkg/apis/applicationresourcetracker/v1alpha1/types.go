@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kubevela/prism/pkg/util/singleton"
+	"github.com/kubevela/pkg/util/singleton"
 )
 
 // ApplicationResourceTracker is an extension model for ResourceTracker

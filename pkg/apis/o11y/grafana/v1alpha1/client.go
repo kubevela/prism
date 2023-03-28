@@ -23,8 +23,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kubevela/pkg/util/apiserver"
+
 	"github.com/kubevela/prism/pkg/apis/o11y/config"
-	"github.com/kubevela/prism/pkg/util/apiserver"
 )
 
 // GrafanaClient client for operate grafana

@@ -25,6 +25,8 @@ import (
 	"time"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/kubevela/pkg/meta"
+	"github.com/kubevela/pkg/util/k8s"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"golang.org/x/exp/slices"
@@ -34,10 +36,10 @@ import (
 	"k8s.io/apiserver/pkg/server"
 	"sigs.k8s.io/apiserver-runtime/pkg/builder"
 
+	"github.com/kubevela/pkg/util/singleton"
+
 	apiserver "github.com/kubevela/prism/pkg/dynamicapiserver"
-	"github.com/kubevela/prism/pkg/util/singleton"
 	_ "github.com/kubevela/prism/test/bootstrap"
-	"github.com/kubevela/prism/test/util"
 )
 
 func TestDynamicServer(t *testing.T) {
@@ -83,7 +85,7 @@ func createConfigMapForDiscovery(group, version, kind string) *corev1.ConfigMap 
 var _ = Describe("Test dynamic server", func() {
 	It("Test bootstrap and mutate spec", func() {
 		By("Bootstrap")
-		_ = util.CreateNamespace("vela-system")
+		_ = k8s.EnsureNamespace(context.Background(), singleton.KubeClient.Get(), meta.NamespaceVelaSystem)
 		s := &builder.GenericAPIServer{
 			Handler: &server.APIServerHandler{
 				GoRestfulContainer: restful.NewContainer(),
