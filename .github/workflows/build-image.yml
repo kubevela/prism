@@ -24,9 +24,8 @@ jobs:
         with:
           images: |
             oamdev/vela-prism
-            ghcr.io/oam-dev/vela-prism
+            ghcr.io/kubevela/oamdev/vela-prism
           tags: |
-            type=ref,event=branch
             type=ref,event=tag
             type=raw,value=latest,enable={{is_default_branch}}
       - name: Login docker.io
