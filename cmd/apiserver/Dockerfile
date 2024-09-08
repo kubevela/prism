@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 \
       -o vela-prism \
       cmd/apiserver/main.go
 
-FROM alpine:3.18.3
+FROM alpine:3.19.4
 # This is required by daemon connnecting with cri
 RUN apk add --no-cache ca-certificates bash expat
 RUN apk add curl
