@@ -15,7 +15,7 @@ jobs:
       - name: Get the vars
         id: vars
         run: |
-          echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+          echo "TAG::${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
