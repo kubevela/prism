@@ -126,7 +126,7 @@ func (in *GrafanaSubResourceRequest) Do(ctx context.Context, cli GrafanaClient) 
 	case http.StatusUnauthorized:
 		return errors.NewUnauthorized(string(respBody))
 	case http.StatusForbidden:
-		return errors.NewForbidden(in.subResource.GetGroupVersionResource().GroupResource(), in.resourceName.String(), fmt.Errorf(string(respBody)))
+		return errors.NewForbidden(in.subResource.GetGroupVersionResource().GroupResource(), in.resourceName.String(), fmt.Errorf("%s", string(respBody)))
 	case http.StatusNotFound:
 		return errors.NewNotFound(in.subResource.GetGroupVersionResource().GroupResource(), in.resourceName.String())
 	case http.StatusPreconditionFailed:
