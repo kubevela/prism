@@ -96,9 +96,9 @@ var _ = Describe("Test dynamic server", func() {
 		singleton.InitGenericAPIServer(s)
 		cfg := &server.RecommendedConfig{}
 		singleton.InitServerConfig(cfg)
-		stopCh := make(chan struct{})
-		defer close(stopCh)
-		_ = apiserver.StartDefaultDynamicAPIServer(server.PostStartHookContext{StopCh: stopCh})
+		hookCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		_ = apiserver.StartDefaultDynamicAPIServer(server.PostStartHookContext{Context: hookCtx})
 
 		By("Add Resource API")
 		ctx := context.Background()

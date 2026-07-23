@@ -58,7 +58,7 @@ jobs:
         with:
           version: 3.1.0
           kubebuilderOnly: false
-          kubernetesVersion: v1.22.0
+          kubernetesVersion: v1.35.5
 
       - name: Run unit-test
         run: make unit-test
