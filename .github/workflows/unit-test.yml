@@ -53,12 +53,12 @@ jobs:
           key: ${{ runner.os }}-pkg-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-pkg-
 
-      - name: install Kubebuilder
-        uses: RyanSiu1995/kubebuilder-action@v1.2
-        with:
-          version: 3.1.0
-          kubebuilderOnly: false
-          kubernetesVersion: v1.35.5
+      - name: install envtest binaries
+        env:
+          ENVTEST_K8S_VERSION: '1.35.5'
+        run: |
+          go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+          echo "KUBEBUILDER_ASSETS=$(setup-envtest use ${ENVTEST_K8S_VERSION} -p path)" >> "$GITHUB_ENV"
 
       - name: Run unit-test
         run: make unit-test
