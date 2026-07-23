@@ -28,6 +28,5 @@ func StartDefaultDynamicAPIServer(ctx server.PostStartHookContext) error {
 		singleton.GenericAPIServer.Get(),
 		singleton.APIServerConfig.Get())
 	go StartDynamicResourceFactoryWithConfigMapInformer(ctx.Done())
-	//go StartDynamicResourceFactoryWithConfigMapInformer(ctx.StopCh)
 	return nil
 }

@@ -124,7 +124,7 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.35.0 // indirect
+	k8s.io/apiextensions-apiserver v0.35.6 // indirect
 	k8s.io/component-base v0.35.6 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kms v0.35.6 // indirect
@@ -139,7 +139,7 @@ require (
 
 replace (
 	cloud.google.com/go => cloud.google.com/go v0.100.2
-	github.com/kubevela/pkg => github.com/anishbista60/pkg v0.0.0-20260722123526-34480bf014a5
+	github.com/kubevela/pkg => github.com/anishbista60/pkg v0.0.0-20260723085558-c1a1862504c4
 	github.com/oam-dev/cluster-gateway => github.com/anishbista60/cluster-gateway v0.0.0-20260722123514-9f9fb7c6e81d
 	sigs.k8s.io/apiserver-runtime => github.com/anishbista60/apiserver-runtime v1.1.2-0.20260722123624-38ed2f9bdeb6
 )
