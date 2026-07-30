@@ -130,7 +130,6 @@ require (
 	k8s.io/kms v0.35.6 // indirect
 	sigs.k8s.io/apiserver-network-proxy v0.31.4 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.3 // indirect
-	sigs.k8s.io/apiserver-runtime v1.1.2-0.20221118041430-0a6394f6dda3 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2-0.20260122202528-d9cc6641c482 // indirect
@@ -139,7 +138,6 @@ require (
 
 replace (
 	cloud.google.com/go => cloud.google.com/go v0.100.2
-	github.com/kubevela/pkg => github.com/anishbista60/pkg v0.0.0-20260723085558-c1a1862504c4
-	github.com/oam-dev/cluster-gateway => github.com/anishbista60/cluster-gateway v0.0.0-20260722123514-9f9fb7c6e81d
-	sigs.k8s.io/apiserver-runtime => github.com/anishbista60/apiserver-runtime v1.1.2-0.20260722123624-38ed2f9bdeb6
+	github.com/kubevela/pkg => github.com/anishbista60/pkg v0.0.0-20260730092023-5ce9efdd8ff1
+	github.com/oam-dev/cluster-gateway => github.com/anishbista60/cluster-gateway v0.0.0-20260730082011-06bb4f3031ff
 )
