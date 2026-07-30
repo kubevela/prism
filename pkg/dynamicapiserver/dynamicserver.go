@@ -29,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/util/managedfields"
 	genericapi "k8s.io/apiserver/pkg/endpoints"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/server"
@@ -162,6 +163,12 @@ func (in *DynamicAPIServer) AddGroupVersionResourceHandler(gvr schema.GroupVersi
 			MinRequestTimeout:   time.Duration(in.config.MinRequestTimeout) * time.Second,
 			MaxRequestBodyBytes: in.config.MaxRequestBodyBytes,
 			Authorizer:          in.server.Authorizer,
+
+			// Dynamic resources have no static OpenAPI schema to derive a
+			// structured field manager from, so fall back to the deduced
+			// (unstructured-object-based) type converter used for schemaless
+			// resources like CRDs without a structural schema.
+			TypeConverter: managedfields.NewDeducedTypeConverter(),
 		}
 	}
 	apiGroupVersion.Storage[gvr.Resource] = storage

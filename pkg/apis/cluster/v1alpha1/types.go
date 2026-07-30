@@ -23,7 +23,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
+	"k8s.io/apiserver/pkg/registry/rest"
 )
 
 // Cluster is an extension model for cluster underlying secrets/ManagedClusters
@@ -52,7 +52,10 @@ type ClusterList struct {
 	Items []Cluster `json:"items"`
 }
 
-var _ resource.Object = &Cluster{}
+var _ rest.Storage = &Cluster{}
+var _ rest.Scoper = &Cluster{}
+var _ rest.Getter = &Cluster{}
+var _ rest.Lister = &Cluster{}
 
 // GetObjectMeta returns the object meta reference.
 func (in *Cluster) GetObjectMeta() *metav1.ObjectMeta {
@@ -90,6 +93,11 @@ func (in *Cluster) IsStorageVersion() bool {
 // ShortNames delivers a list of short names for a resource.
 func (in *Cluster) ShortNames() []string {
 	return []string{"vc", "vela-cluster", "vela-clusters"}
+}
+
+// GetSingularName implements SingularNameProvider
+func (in *Cluster) GetSingularName() string {
+	return "cluster"
 }
 
 // GetFullName returns the name with alias

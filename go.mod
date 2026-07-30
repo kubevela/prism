@@ -9,6 +9,7 @@ require (
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20250629203450-2b04dd452b7a
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
+	github.com/spf13/cobra v1.10.0
 	github.com/spf13/pflag v1.0.9
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
@@ -16,10 +17,11 @@ require (
 	k8s.io/apimachinery v0.35.6
 	k8s.io/apiserver v0.35.6
 	k8s.io/client-go v0.35.6
+	k8s.io/component-base v0.35.6
 	k8s.io/klog/v2 v2.130.1
+	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
 	open-cluster-management.io/api v0.11.0
-	sigs.k8s.io/apiserver-runtime v1.1.2-0.20250117204231-9282f514a674
 	sigs.k8s.io/controller-runtime v0.23.3
 	sigs.k8s.io/controller-tools v0.16.5
 )
@@ -85,7 +87,6 @@ require (
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20250627152318-f293424e46b5 // indirect
-	github.com/spf13/cobra v1.10.0 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.etcd.io/etcd/api/v3 v3.6.5 // indirect
@@ -125,12 +126,11 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.35.6 // indirect
-	k8s.io/component-base v0.35.6 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kms v0.35.6 // indirect
-	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
 	sigs.k8s.io/apiserver-network-proxy v0.31.4 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.31.3 // indirect
+	sigs.k8s.io/apiserver-runtime v1.1.2-0.20221118041430-0a6394f6dda3 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2-0.20260122202528-d9cc6641c482 // indirect
