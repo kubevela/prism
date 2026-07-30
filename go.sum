@@ -8,12 +8,10 @@ github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/NYTimes/gziphandler v1.1.1 h1:ZUDjpQae29j0ryrS0u/B8HZfJBtBQHjqw2rQ2cqUQ3I=
 github.com/NYTimes/gziphandler v1.1.1/go.mod h1:n/CVRwUEOgIxrgPvAQhUUr9oeUtvrhMomdKFjzJNB0c=
-github.com/anishbista60/apiserver-runtime v1.1.2-0.20260722123624-38ed2f9bdeb6 h1:bxsDfytzI7NL8FrXWQ/fpzsEczeKTc0GKfmv2ae2MAw=
-github.com/anishbista60/apiserver-runtime v1.1.2-0.20260722123624-38ed2f9bdeb6/go.mod h1:zEuqxSQvJeZnNWecgmbJ893T+dKUHeuR7rHwgsYtY3k=
-github.com/anishbista60/cluster-gateway v0.0.0-20260722123514-9f9fb7c6e81d h1:HXpP7YMPFO19MXcgH/AsHSdmckRvO7yzGJcObcD27ek=
-github.com/anishbista60/cluster-gateway v0.0.0-20260722123514-9f9fb7c6e81d/go.mod h1:MlH3KlWgdJxGcQlfmelBGpSyen40AkpZ9yYfhE0H/0c=
-github.com/anishbista60/pkg v0.0.0-20260723085558-c1a1862504c4 h1:O/p3ZnHP5NAK+tK4BrdfLclhkg1B+hvCSKO2hkudqls=
-github.com/anishbista60/pkg v0.0.0-20260723085558-c1a1862504c4/go.mod h1:GIXSugHf+jVuEV0uiYedTYZx7wH/a2OAEGIzy/IhP0E=
+github.com/anishbista60/cluster-gateway v0.0.0-20260730082011-06bb4f3031ff h1:SfrKly9tr5aAkyxmQDcv9/tzI+wF0YnzdCAfZHJjmd4=
+github.com/anishbista60/cluster-gateway v0.0.0-20260730082011-06bb4f3031ff/go.mod h1:yVqOSQkEcKXPQZ2j5BQ1SSV4XE+3/7c4B/FMQl146es=
+github.com/anishbista60/pkg v0.0.0-20260730092023-5ce9efdd8ff1 h1:YkqI1mf5MeF78+V17zTYW5a6cMRgj/LYf+0/n1HCmXw=
+github.com/anishbista60/pkg v0.0.0-20260730092023-5ce9efdd8ff1/go.mod h1:h+Xxb+eFc2ZRox3nIdMAFLX9jHhh4GblbIybi38f87E=
 github.com/antlr4-go/antlr/v4 v4.13.0 h1:lxCg3LAv+EUK6t1i0y1V6/SLeUi0eKEKdhQAlS8TVTI=
 github.com/antlr4-go/antlr/v4 v4.13.0/go.mod h1:pfChB/xh/Unjila75QW7+VU4TSnWnnk9UTnmpPaOR2g=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
@@ -102,8 +100,6 @@ github.com/google/gnostic-models v0.7.0/go.mod h1:whL5G0m6dmc5cPxKc5bdKdEN3UjI7O
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
-github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
-github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 h1:BHT72Gu3keYf3ZEu2J0b1vyeLSOYI8bm5wbJM/8yDe8=
 github.com/google/pprof v0.0.0-20250403155104-27863c87afa6/go.mod h1:boTsfXsheKC2y+lKOCMpSfarhxDeIzfZG1jqGcPl3cA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
