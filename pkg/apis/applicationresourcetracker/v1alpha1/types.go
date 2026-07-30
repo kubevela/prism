@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apiserver/pkg/endpoints/request"
 	apirest "k8s.io/apiserver/pkg/registry/rest"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kubevela/pkg/util/singleton"
@@ -52,7 +51,10 @@ type ApplicationResourceTrackerList struct {
 	Items []ApplicationResourceTracker `json:"items"`
 }
 
-var _ resource.Object = &ApplicationResourceTracker{}
+var _ apirest.Storage = &ApplicationResourceTracker{}
+var _ apirest.Scoper = &ApplicationResourceTracker{}
+var _ apirest.Getter = &ApplicationResourceTracker{}
+var _ apirest.Lister = &ApplicationResourceTracker{}
 
 // GetObjectMeta returns the object meta reference.
 func (in *ApplicationResourceTracker) GetObjectMeta() *metav1.ObjectMeta {
@@ -90,6 +92,11 @@ func (in *ApplicationResourceTracker) IsStorageVersion() bool {
 // ShortNames delivers a list of short names for a resource.
 func (in *ApplicationResourceTracker) ShortNames() []string {
 	return []string{"apprt"}
+}
+
+// GetSingularName implements SingularNameProvider
+func (in *ApplicationResourceTracker) GetSingularName() string {
+	return "applicationresourcetracker"
 }
 
 // Get finds a resource in the storage by name and returns it.

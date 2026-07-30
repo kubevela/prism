@@ -25,10 +25,16 @@ import (
 	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/kubevela/prism/pkg/util/subresource"
 )
+
+// groupVersionResourceProvider is the minimal contract GrafanaSubResourceRequest
+// needs from its parent resource, to report the right GroupResource on errors.
+type groupVersionResourceProvider interface {
+	GetGroupVersionResource() schema.GroupVersionResource
+}
 
 // DoRequest do request for the current grafana
 func (in *Grafana) DoRequest(ctx context.Context, method string, path string, body io.Reader) ([]byte, int, error) {
@@ -55,9 +61,10 @@ func (in *Grafana) DoRequest(ctx context.Context, method string, path string, bo
 
 // GrafanaSubResourceRequest request for grafana subresources
 // +kubebuilder:object:generate=false
+// +k8s:openapi-gen=false
 type GrafanaSubResourceRequest struct {
 	resourceName *subresource.CompoundName
-	subResource  resource.Object
+	subResource  groupVersionResourceProvider
 
 	method    string
 	pathFunc  func() (string, error)
@@ -66,7 +73,7 @@ type GrafanaSubResourceRequest struct {
 }
 
 // NewGrafanaSubResourceRequest create request for grafana subresource
-func NewGrafanaSubResourceRequest(subResource resource.Object, name string) *GrafanaSubResourceRequest {
+func NewGrafanaSubResourceRequest(subResource groupVersionResourceProvider, name string) *GrafanaSubResourceRequest {
 	return &GrafanaSubResourceRequest{
 		resourceName: subresource.NewCompoundName(name),
 		subResource:  subResource,

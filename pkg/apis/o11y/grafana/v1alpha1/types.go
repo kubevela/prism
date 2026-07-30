@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/registry/rest"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder/resource"
 
 	"github.com/kubevela/pkg/util/apiserver"
 	"github.com/kubevela/pkg/util/singleton"
@@ -66,7 +65,8 @@ type GrafanaList struct {
 	Items []Grafana `json:"items"`
 }
 
-var _ resource.Object = &Grafana{}
+var _ rest.Storage = &Grafana{}
+var _ rest.Scoper = &Grafana{}
 var _ rest.Getter = &Grafana{}
 var _ rest.Lister = &Grafana{}
 var _ rest.CreaterUpdater = &Grafana{}
@@ -109,6 +109,11 @@ func (in *Grafana) IsStorageVersion() bool {
 // ShortNames delivers a list of short names for a resource.
 func (in *Grafana) ShortNames() []string {
 	return []string{"gf", "grafana-instance"}
+}
+
+// GetSingularName implements SingularNameProvider
+func (in *Grafana) GetSingularName() string {
+	return "grafana"
 }
 
 const (
