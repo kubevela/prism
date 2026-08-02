@@ -72,7 +72,7 @@ func newCommand() *cobra.Command {
 			return runServer(c.Context(), o)
 		},
 	}
-	cmd.SetContext(context.Background())
+	cmd.SetContext(genericapiserver.SetupSignalContext())
 
 	flags := cmd.Flags()
 	o.AddFlags(flags)
