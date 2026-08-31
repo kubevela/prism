@@ -34,7 +34,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/endpoints/discovery"
 	"k8s.io/apiserver/pkg/server"
-	"sigs.k8s.io/apiserver-runtime/pkg/builder"
 
 	"github.com/kubevela/pkg/util/singleton"
 
@@ -86,7 +85,7 @@ var _ = Describe("Test dynamic server", func() {
 	It("Test bootstrap and mutate spec", func() {
 		By("Bootstrap")
 		_ = k8s.EnsureNamespace(context.Background(), singleton.KubeClient.Get(), meta.NamespaceVelaSystem)
-		s := &builder.GenericAPIServer{
+		s := &server.GenericAPIServer{
 			Handler: &server.APIServerHandler{
 				GoRestfulContainer: restful.NewContainer(),
 			},
@@ -96,9 +95,9 @@ var _ = Describe("Test dynamic server", func() {
 		singleton.InitGenericAPIServer(s)
 		cfg := &server.RecommendedConfig{}
 		singleton.InitServerConfig(cfg)
-		stopCh := make(chan struct{})
-		defer close(stopCh)
-		_ = apiserver.StartDefaultDynamicAPIServer(server.PostStartHookContext{StopCh: stopCh})
+		hookCtx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		_ = apiserver.StartDefaultDynamicAPIServer(server.PostStartHookContext{Context: hookCtx})
 
 		By("Add Resource API")
 		ctx := context.Background()
