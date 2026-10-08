@@ -1,6 +1,6 @@
 ARG BASE_IMAGE
 # Build the manager binary
-FROM golang:1.25.12-alpine as builder
+FROM golang:1.27.1-alpine as builder
 ARG OS
 ARG ARCH
 
