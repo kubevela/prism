@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"net"
+	"slices"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,9 +30,9 @@ import (
 	genericapiserver "k8s.io/apiserver/pkg/server"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	basecompatibility "k8s.io/component-base/compatibility"
 	baseversion "k8s.io/component-base/version"
-	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/klog/v2"
 	netutils "k8s.io/utils/net"
 
@@ -69,6 +70,7 @@ func newCommand() *cobra.Command {
 		Use:   "vela-prism",
 		Short: "Launch the vela-prism aggregated apiserver",
 		RunE: func(c *cobra.Command, args []string) error {
+			disableMutatingAdmissionPolicyByDefault(o)
 			return runServer(c.Context(), o)
 		},
 	}
@@ -88,6 +90,24 @@ func newCommand() *cobra.Command {
 	o11yconfig.AddObservabilityFlags(flags)
 
 	return cmd
+}
+
+// mutatingAdmissionPolicyPlugin is on by default since apiserver 0.36, but its
+// informers never sync on hubs that don't serve the MutatingAdmissionPolicy API
+// (k8s < 1.36), which leaves the server not ready to handle writes.
+const mutatingAdmissionPolicyPlugin = "MutatingAdmissionPolicy"
+
+// disableMutatingAdmissionPolicyByDefault turns the plugin off unless it was
+// enabled with --enable-admission-plugins. It runs after flag parsing.
+func disableMutatingAdmissionPolicyByDefault(o *genericoptions.RecommendedOptions) {
+	if o.Admission == nil {
+		return
+	}
+	if slices.Contains(o.Admission.EnablePlugins, mutatingAdmissionPolicyPlugin) ||
+		slices.Contains(o.Admission.DisablePlugins, mutatingAdmissionPolicyPlugin) {
+		return
+	}
+	o.Admission.DisablePlugins = append(o.Admission.DisablePlugins, mutatingAdmissionPolicyPlugin)
 }
 
 func runServer(ctx context.Context, o *genericoptions.RecommendedOptions) error {
