@@ -40,6 +40,11 @@ var _ = Describe("Test codec", func() {
 		Ω(typer.Kind()).To(Equal("Tester"))
 		Ω(typer.KindList()).To(Equal("TesterList"))
 		Ω(typer.Resource()).To(Equal("testers"))
+		Ω(typer.Singular()).To(Equal("tester"))
+		typer, err = dynamicresource.NewDefaultTyper("v1", "ConfigMap")
+		Ω(err).To(Succeed())
+		Ω(typer.Resource()).To(Equal("configmaps"))
+		Ω(typer.Singular()).To(Equal("configmap"))
 	})
 
 	It("Test template codec", func() {

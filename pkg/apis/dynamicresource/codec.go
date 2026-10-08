@@ -35,6 +35,7 @@ type Typer interface {
 	Kind() string
 	KindList() string
 	Resource() string
+	Singular() string
 	Namespaced() bool
 }
 
@@ -49,6 +50,7 @@ type typer struct {
 	groupVersion schema.GroupVersion
 	kind         string
 	resource     string
+	singular     string
 	kindList     string
 	namespaced   bool
 }
@@ -83,6 +85,10 @@ func (in *typer) Resource() string {
 	return in.resource
 }
 
+func (in *typer) Singular() string {
+	return in.singular
+}
+
 func (in *typer) Namespaced() bool {
 	return in.namespaced
 }
@@ -93,16 +99,22 @@ func NewDefaultTyper(apiVersion string, kind string) (Typer, error) {
 		return nil, err
 	}
 	resource := strings.ToLower(kind) + "s"
+	singular := strings.ToLower(kind)
 	namespaced := true
-	mappings, err := singleton.RESTMapper.Get().RESTMappings(gv.WithKind(kind).GroupKind(), gv.Version)
+	mapper := singleton.RESTMapper.Get()
+	mappings, err := mapper.RESTMappings(gv.WithKind(kind).GroupKind(), gv.Version)
 	if err == nil && len(mappings) > 0 {
 		resource = mappings[0].Resource.Resource
 		namespaced = mappings[0].Scope.Name() == meta.RESTScopeNameNamespace
+		if s, err := mapper.ResourceSingularizer(resource); err == nil && s != "" {
+			singular = s
+		}
 	}
 	return &typer{
 		groupVersion: gv,
 		kind:         kind,
 		resource:     resource,
+		singular:     singular,
 		kindList:     kind + "List",
 		namespaced:   namespaced,
 	}, nil

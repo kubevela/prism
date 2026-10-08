@@ -7,8 +7,7 @@ generate:
 
 .PHONY: generate-openapi
 generate-openapi:
-	go install k8s.io/kube-openapi/cmd/openapi-gen@v0.0.0-20260721132016-d427ff9ee9ad
-	$(shell go env GOPATH)/bin/openapi-gen \
+	go run k8s.io/kube-openapi/cmd/openapi-gen@v0.0.0-20260721132016-d427ff9ee9ad \
 	--output-pkg "generated" \
 	--output-file zz_generated.openapi.go \
 	--output-dir ./pkg/apis/generated \

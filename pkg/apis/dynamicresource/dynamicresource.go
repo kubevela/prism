@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/internalversion"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,9 +40,19 @@ type DynamicResource struct {
 	codec Codec
 }
 
-// uns returns in.Uns, lazily initializing it if nil. Field-manager internals
-// construct a DynamicResource's zero value via reflection (bypassing New()),
-// so every accessor must tolerate a nil Uns rather than panic.
+// Field-manager internals build a DynamicResource's zero value via reflection,
+// bypassing New(), so every accessor must tolerate a nil Uns.
+
+// get returns in.Uns for reading, or an empty object when it is nil, without
+// writing to in.Uns.
+func (in *DynamicResource) get() *unstructured.Unstructured {
+	if in.Uns == nil {
+		return &unstructured.Unstructured{}
+	}
+	return in.Uns
+}
+
+// uns returns in.Uns for writing, initializing it first when it is nil.
 func (in *DynamicResource) uns() *unstructured.Unstructured {
 	if in.Uns == nil {
 		in.Uns = &unstructured.Unstructured{}
@@ -52,7 +61,7 @@ func (in *DynamicResource) uns() *unstructured.Unstructured {
 }
 
 func (in *DynamicResource) GetNamespace() string {
-	return in.uns().GetNamespace()
+	return in.get().GetNamespace()
 }
 
 func (in *DynamicResource) SetNamespace(namespace string) {
@@ -60,7 +69,7 @@ func (in *DynamicResource) SetNamespace(namespace string) {
 }
 
 func (in *DynamicResource) GetName() string {
-	return in.uns().GetName()
+	return in.get().GetName()
 }
 
 func (in *DynamicResource) SetName(name string) {
@@ -68,7 +77,7 @@ func (in *DynamicResource) SetName(name string) {
 }
 
 func (in *DynamicResource) GetGenerateName() string {
-	return in.uns().GetGenerateName()
+	return in.get().GetGenerateName()
 }
 
 func (in *DynamicResource) SetGenerateName(name string) {
@@ -76,7 +85,7 @@ func (in *DynamicResource) SetGenerateName(name string) {
 }
 
 func (in *DynamicResource) GetUID() types.UID {
-	return in.uns().GetUID()
+	return in.get().GetUID()
 }
 
 func (in *DynamicResource) SetUID(uid types.UID) {
@@ -84,7 +93,7 @@ func (in *DynamicResource) SetUID(uid types.UID) {
 }
 
 func (in *DynamicResource) GetResourceVersion() string {
-	return in.uns().GetResourceVersion()
+	return in.get().GetResourceVersion()
 }
 
 func (in *DynamicResource) SetResourceVersion(version string) {
@@ -92,7 +101,7 @@ func (in *DynamicResource) SetResourceVersion(version string) {
 }
 
 func (in *DynamicResource) GetGeneration() int64 {
-	return in.uns().GetGeneration()
+	return in.get().GetGeneration()
 }
 
 func (in *DynamicResource) SetGeneration(generation int64) {
@@ -100,7 +109,7 @@ func (in *DynamicResource) SetGeneration(generation int64) {
 }
 
 func (in *DynamicResource) GetSelfLink() string {
-	return in.uns().GetSelfLink()
+	return in.get().GetSelfLink()
 }
 
 func (in *DynamicResource) SetSelfLink(selfLink string) {
@@ -108,7 +117,7 @@ func (in *DynamicResource) SetSelfLink(selfLink string) {
 }
 
 func (in *DynamicResource) GetCreationTimestamp() metav1.Time {
-	return in.uns().GetCreationTimestamp()
+	return in.get().GetCreationTimestamp()
 }
 
 func (in *DynamicResource) SetCreationTimestamp(timestamp metav1.Time) {
@@ -116,7 +125,7 @@ func (in *DynamicResource) SetCreationTimestamp(timestamp metav1.Time) {
 }
 
 func (in *DynamicResource) GetDeletionTimestamp() *metav1.Time {
-	return in.uns().GetDeletionTimestamp()
+	return in.get().GetDeletionTimestamp()
 }
 
 func (in *DynamicResource) SetDeletionTimestamp(timestamp *metav1.Time) {
@@ -124,7 +133,7 @@ func (in *DynamicResource) SetDeletionTimestamp(timestamp *metav1.Time) {
 }
 
 func (in *DynamicResource) GetDeletionGracePeriodSeconds() *int64 {
-	return in.uns().GetDeletionGracePeriodSeconds()
+	return in.get().GetDeletionGracePeriodSeconds()
 }
 
 func (in *DynamicResource) SetDeletionGracePeriodSeconds(i *int64) {
@@ -132,7 +141,7 @@ func (in *DynamicResource) SetDeletionGracePeriodSeconds(i *int64) {
 }
 
 func (in *DynamicResource) GetLabels() map[string]string {
-	return in.uns().GetLabels()
+	return in.get().GetLabels()
 }
 
 func (in *DynamicResource) SetLabels(labels map[string]string) {
@@ -140,7 +149,7 @@ func (in *DynamicResource) SetLabels(labels map[string]string) {
 }
 
 func (in *DynamicResource) GetAnnotations() map[string]string {
-	return in.uns().GetAnnotations()
+	return in.get().GetAnnotations()
 }
 
 func (in *DynamicResource) SetAnnotations(annotations map[string]string) {
@@ -148,7 +157,7 @@ func (in *DynamicResource) SetAnnotations(annotations map[string]string) {
 }
 
 func (in *DynamicResource) GetFinalizers() []string {
-	return in.uns().GetFinalizers()
+	return in.get().GetFinalizers()
 }
 
 func (in *DynamicResource) SetFinalizers(finalizers []string) {
@@ -156,7 +165,7 @@ func (in *DynamicResource) SetFinalizers(finalizers []string) {
 }
 
 func (in *DynamicResource) GetOwnerReferences() []metav1.OwnerReference {
-	return in.uns().GetOwnerReferences()
+	return in.get().GetOwnerReferences()
 }
 
 func (in *DynamicResource) SetOwnerReferences(references []metav1.OwnerReference) {
@@ -164,7 +173,7 @@ func (in *DynamicResource) SetOwnerReferences(references []metav1.OwnerReference
 }
 
 func (in *DynamicResource) GetManagedFields() []metav1.ManagedFieldsEntry {
-	return in.uns().GetManagedFields()
+	return in.get().GetManagedFields()
 }
 
 func (in *DynamicResource) SetManagedFields(managedFields []metav1.ManagedFieldsEntry) {
@@ -216,7 +225,7 @@ func (in *DynamicResource) GetObjectKind() schema.ObjectKind {
 }
 
 func (in *DynamicResource) GetObjectMeta() *metav1.ObjectMeta {
-	uns := in.uns()
+	uns := in.get()
 	return &metav1.ObjectMeta{
 		Name:                       uns.GetName(),
 		GenerateName:               uns.GetGenerateName(),
@@ -277,7 +286,7 @@ func (in *DynamicResource) GetGroupVersion() schema.GroupVersion {
 
 // GetSingularName implements SingularNameProvider
 func (in *DynamicResource) GetSingularName() string {
-	return strings.ToLower(in.codec.Source().Kind())
+	return in.codec.Source().Singular()
 }
 
 func (in *DynamicResource) IsStorageVersion() bool {
@@ -286,7 +295,7 @@ func (in *DynamicResource) IsStorageVersion() bool {
 
 func (in *DynamicResource) DeepCopyObject() runtime.Object {
 	return &DynamicResource{
-		Uns:   in.uns().DeepCopy(),
+		Uns:   in.get().DeepCopy(),
 		codec: in.codec,
 	}
 }
@@ -410,7 +419,7 @@ func (in *DynamicResource) ConvertToTable(ctx context.Context, object runtime.Ob
 }
 
 func (in *DynamicResource) MarshalJSON() ([]byte, error) {
-	return json.Marshal(in.uns())
+	return json.Marshal(in.get())
 }
 
 func (in *DynamicResource) UnmarshalJSON(bs []byte) error {

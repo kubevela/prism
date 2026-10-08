@@ -30,7 +30,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/managedfields"
 	"k8s.io/utils/pointer"
+	"sigs.k8s.io/structured-merge-diff/v6/fieldpath"
 
 	"github.com/kubevela/prism/pkg/apis/dynamicresource"
 )
@@ -109,6 +111,7 @@ var _ = Describe("Test dynamic resource", func() {
 		Ω(dr.GetGroupVersionKind()).To(Equal(gvk))
 		Ω(dr.GetGroupVersion()).To(Equal(gv))
 		Ω(dr.IsStorageVersion()).To(BeTrue())
+		Ω(dr.GetSingularName()).To(Equal("tester"))
 
 		Ω(dr.DeepCopyObject().(*dynamicresource.DynamicResource).GetObjectMeta()).To(Equal(dr.GetObjectMeta()))
 		bs, err := dr.MarshalJSON()
@@ -127,6 +130,33 @@ var _ = Describe("Test dynamic resource", func() {
 		Ω(err).To(Succeed())
 		Ω(ndrs.UnmarshalJSON(bs)).To(Succeed())
 		Ω(len(ndrs.DeepCopyObject().(*dynamicresource.DynamicResourceList).UnsList.Items)).To(Equal(1))
+	})
+
+	It("Test zero value reads do not mutate", func() {
+		dr := &dynamicresource.DynamicResource{}
+		Ω(dr.GetName()).To(BeEmpty())
+		Ω(dr.GetObjectMeta()).To(Equal(&metav1.ObjectMeta{}))
+		Ω(dr.DeepCopyObject().(*dynamicresource.DynamicResource).Uns).NotTo(BeNil())
+		_, err := dr.MarshalJSON()
+		Ω(err).To(Succeed())
+		Ω(dr.Uns).To(BeNil())
+		dr.SetName("name")
+		Ω(dr.GetName()).To(Equal("name"))
+	})
+
+	It("Test managed fields track the object fields", func() {
+		dr := &dynamicresource.DynamicResource{Uns: &unstructured.Unstructured{Object: map[string]interface{}{
+			"apiVersion": "test.oam.dev/v1alpha2",
+			"kind":       "Tester",
+			"metadata":   map[string]interface{}{"name": "name"},
+			"spec":       map[string]interface{}{"key": "value"},
+		}}}
+		typed, err := managedfields.NewDeducedTypeConverter().ObjectToTyped(dr)
+		Ω(err).To(Succeed())
+		fields, err := typed.ToFieldSet()
+		Ω(err).To(Succeed())
+		Ω(fields.Has(fieldpath.MakePathOrDie("spec", "key"))).To(BeTrue())
+		Ω(fields.Has(fieldpath.MakePathOrDie("Uns"))).To(BeFalse())
 	})
 
 	It("Test CURD API", func() {
