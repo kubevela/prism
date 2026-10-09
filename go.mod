@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	cuelang.org/go v0.14.1
 	github.com/emicklei/go-restful/v3 v3.13.0
-	github.com/kubevela/pkg v1.11.1-0.20261008070215-80dd3658496b
+	github.com/kubevela/pkg v1.11.1-0.20261008134319-567282fda0b1
 	github.com/oam-dev/cluster-gateway v1.9.2-0.20261007161929-f1e00d9a9b07
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
@@ -24,6 +24,7 @@ require (
 	open-cluster-management.io/api v0.11.0
 	sigs.k8s.io/controller-runtime v0.25.2
 	sigs.k8s.io/controller-tools v0.22.0
+	sigs.k8s.io/structured-merge-diff/v6 v6.4.2
 )
 
 require (
@@ -141,7 +142,6 @@ require (
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.36.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
